@@ -1,0 +1,1968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DXB RE Screen</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,400;1,600&family=IBM+Plex+Mono:wght@400;500;600;700&family=Instrument+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════ RESET & ROOT ════════════════════════════════ */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:    #06080f;
+  --bg1:   #0a0e18;
+  --bg2:   #0e1520;
+  --bg3:   #131c2a;
+  --bg4:   #182030;
+  --bg5:   #1d2838;
+  --amber: #f0a500;
+  --amber2:#ffc740;
+  --amber3:#7a5200;
+  --teal:  #00a878;
+  --teal2: #00d49a;
+  --teal3: #004d38;
+  --red:   #d44040;
+  --red2:  #ff6060;
+  --red3:  #5a1414;
+  --blue:  #4080e0;
+  --blue2: #60a0ff;
+  --purple:#8060d8;
+  --cream: #e8ecf0;
+  --muted: #8090a8;
+  --dim:   #3a4858;
+  --vdim:  #1e2838;
+  --bd:    rgba(240,165,0,.1);
+  --bd2:   rgba(240,165,0,.2);
+  --bd3:   rgba(240,165,0,.4);
+  --pdisplay:'Playfair Display',Georgia,serif;
+  --pmono:  'IBM Plex Mono','Courier New',monospace;
+  --psans:  'Instrument Sans',system-ui,sans-serif;
+}
+html,body{background:var(--bg);color:var(--cream);font-family:var(--psans);min-height:100vh;font-size:13px;overflow-x:hidden}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--dim)}
+
+/* ═══════════════════════════════ ANIMATIONS ══════════════════════════════════ */
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+@keyframes flicker{0%,100%{opacity:1}50%{opacity:.15}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes glow{0%,100%{box-shadow:0 0 8px rgba(240,165,0,.15)}50%{box-shadow:0 0 20px rgba(240,165,0,.35)}}
+@keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.rise{animation:rise .4s cubic-bezier(.16,1,.3,1) both}
+.spi{display:inline-block;width:10px;height:10px;border:1.5px solid rgba(240,165,0,.2);border-top-color:var(--amber);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:5px}
+
+/* ═══════════════════════════════ TICKER ═════════════════════════════════════ */
+#ticker{
+  height:24px;background:var(--bg1);border-bottom:1px solid var(--bd);
+  overflow:hidden;display:flex;align-items:center;
+  font-family:var(--pmono);font-size:9px;
+}
+.tk{display:flex;white-space:nowrap;animation:marquee 90s linear infinite}
+.tk:hover{animation-play-state:paused}
+.ti{padding:0 20px;color:var(--dim)}
+.ta{color:var(--amber);font-weight:600}
+.tt{color:var(--teal2)}
+.tr{color:var(--red2)}
+
+/* ═══════════════════════════════ HEADER ════════════════════════════════════ */
+#hdr{
+  background:var(--bg1);border-bottom:1px solid var(--bd);
+  position:sticky;top:0;z-index:100;
+}
+.hi{max-width:1900px;margin:0 auto;padding:0 20px;display:flex;align-items:stretch}
+.brand{padding:11px 18px 8px 0;border-right:1px solid var(--bd);flex-shrink:0;margin-right:0}
+.bn{font-family:var(--pdisplay);font-size:19px;font-weight:700;color:var(--cream);letter-spacing:-.01em}
+.bn em{font-style:italic;color:var(--amber)}
+.bs{font-family:var(--pmono);font-size:8px;color:var(--dim);letter-spacing:.14em;text-transform:uppercase;margin-top:1px}
+.nav-tabs{display:flex;align-items:flex-end;padding:0 8px}
+.nt{
+  background:transparent;border:none;border-bottom:2px solid transparent;
+  color:var(--dim);padding:11px 13px 7px;font-family:var(--pmono);font-size:9px;
+  cursor:pointer;letter-spacing:.09em;font-weight:600;transition:all .15s;text-transform:uppercase;
+  white-space:nowrap;
+}
+.nt.on{border-bottom-color:var(--amber);color:var(--amber)}
+.nt:hover:not(.on){color:var(--cream)}
+.hright{display:flex;align-items:center;gap:8px;padding:7px 0;margin-left:auto}
+.chip{
+  font-family:var(--pmono);font-size:8.5px;padding:3px 8px;border-radius:2px;
+  border:1px solid;display:inline-flex;align-items:center;gap:4px;letter-spacing:.07em;
+}
+.chip-live{background:rgba(0,168,120,.07);border-color:rgba(0,168,120,.25);color:var(--teal2)}
+.chip-live .dot{width:5px;height:5px;border-radius:50%;background:var(--teal2);animation:flicker 2s ease-in-out infinite}
+.chip-dim{background:var(--bg2);border-color:var(--bd);color:var(--muted)}
+.chip-warn{background:rgba(212,64,64,.07);border-color:rgba(212,64,64,.25);color:var(--red2)}
+.chip-gold{background:rgba(240,165,0,.07);border-color:var(--bd2);color:var(--amber)}
+
+/* Key input */
+.key-wrap{display:flex;gap:5px;align-items:center}
+#key-btn{font-family:var(--pmono);font-size:8.5px;padding:3px 8px;border-radius:2px;border:1px solid var(--bd);color:var(--dim);cursor:pointer;background:transparent;letter-spacing:.07em;transition:all .13s}
+#key-btn:hover{border-color:var(--amber);color:var(--amber)}
+#key-row{display:none;gap:5px;align-items:center}
+#key-in{background:rgba(0,0,0,.5);border:1px solid var(--bd2);color:var(--cream);padding:3px 9px;border-radius:2px;font-family:var(--pmono);font-size:9px;outline:none;width:240px}
+#key-in:focus{border-color:var(--amber)}
+#key-in::placeholder{color:var(--vdim)}
+#key-save{background:var(--amber);color:#030508;border:none;padding:3px 10px;border-radius:2px;font-family:var(--pmono);font-size:8.5px;font-weight:700;cursor:pointer;letter-spacing:.08em}
+#key-ok{display:none;align-items:center;gap:5px}
+.btn{
+  font-family:var(--pmono);font-size:9px;font-weight:700;border:none;cursor:pointer;
+  padding:6px 13px;border-radius:2px;letter-spacing:.08em;transition:all .13s;
+  white-space:nowrap;text-transform:uppercase;display:inline-flex;align-items:center;gap:4px;
+}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.b-amber{background:var(--amber);color:#030508}.b-amber:hover:not(:disabled){background:var(--amber2)}
+.b-teal{background:transparent;border:1px solid rgba(0,168,120,.3);color:var(--teal2)}.b-teal:hover:not(:disabled){background:rgba(0,168,120,.07)}
+.b-dim{background:transparent;border:1px solid var(--bd);color:var(--dim)}.b-dim:hover:not(:disabled){border-color:var(--amber);color:var(--amber)}
+
+/* ═══════════════════════════════ MAIN ══════════════════════════════════════ */
+#main{max-width:1900px;margin:0 auto;padding:14px 20px}
+
+/* ═══════════════════════════════ KPI STRIP ═════════════════════════════════ */
+.kstrip{display:grid;grid-template-columns:repeat(8,1fr);gap:1px;background:var(--bd);border:1px solid var(--bd);border-radius:3px;overflow:hidden;margin-bottom:12px;animation:fadein .5s ease both}
+.kc{background:var(--bg1);padding:9px 12px;position:relative}
+.kc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--kc,var(--amber))}
+.kl{font-family:var(--pmono);font-size:7.5px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
+.kv{font-family:var(--pmono);font-size:18px;font-weight:700;color:var(--kc,var(--amber));line-height:1}
+.ks{font-size:8px;color:var(--vdim);margin-top:1px;font-family:var(--pmono)}
+
+/* ═══════════════════════════════ GRADE SUMMARY ═════════════════════════════ */
+.grade-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.grade-card{
+  background:var(--bg1);border:1px solid var(--bd);border-radius:3px;
+  padding:10px 16px;display:flex;align-items:center;gap:14px;
+  cursor:pointer;transition:border-color .13s,transform .13s;flex:1;min-width:160px;
+}
+.grade-card:hover{border-color:var(--bd3);transform:translateY(-1px)}
+.gc-badge{font-family:var(--pmono);font-size:9px;font-weight:700;padding:3px 8px;border-radius:2px;letter-spacing:.1em;white-space:nowrap;border:1px solid}
+.gc-n{font-family:var(--pmono);font-size:28px;font-weight:700;line-height:1}
+.gc-l{font-family:var(--pmono);font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:1px}
+/* grade colors */
+.g-sb{background:rgba(0,168,120,.1);border-color:rgba(0,168,120,.3);color:var(--teal2)}
+.g-b{background:rgba(64,128,224,.1);border-color:rgba(64,128,224,.3);color:var(--blue2)}
+.g-w{background:rgba(240,165,0,.1);border-color:rgba(240,165,0,.3);color:var(--amber)}
+.g-p{background:rgba(212,64,64,.1);border-color:rgba(212,64,64,.3);color:var(--red2)}
+
+/* ═══════════════════════════════ CONTROLS ══════════════════════════════════ */
+.ctrl{display:flex;gap:6px;align-items:center;margin-bottom:9px;flex-wrap:wrap}
+.fsel{background:var(--bg2);border:1px solid var(--bd);color:var(--muted);padding:4px 7px;border-radius:2px;font-family:var(--pmono);font-size:9px;outline:none;cursor:pointer;transition:border-color .12s}
+.fsel:focus{border-color:var(--amber)}
+.fsrch{background:var(--bg2);border:1px solid var(--bd);color:var(--muted);padding:4px 9px;border-radius:2px;font-family:var(--pmono);font-size:9px;outline:none;width:150px;transition:border-color .12s}
+.fsrch:focus{border-color:var(--amber)}
+.fct{margin-left:auto;font-family:var(--pmono);font-size:9px;color:var(--dim)}
+.hurdle-chip{font-family:var(--pmono);font-size:8.5px;padding:3px 8px;border:1px solid var(--bd2);border-radius:2px;color:var(--amber);background:rgba(240,165,0,.04)}
+
+/* ═══════════════════════════════ TABLE ════════════════════════════════════ */
+.tw{background:var(--bg1);border:1px solid var(--bd);border-radius:3px;overflow:auto;max-height:calc(100vh - 320px)}
+table{width:100%;border-collapse:collapse;font-family:var(--pmono)}
+thead tr{background:var(--bg3);position:sticky;top:0;z-index:3}
+th{
+  padding:7px 9px;text-align:left;font-size:7.5px;color:var(--dim);
+  letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--bd);
+  font-weight:600;white-space:nowrap;cursor:pointer;user-select:none;
+}
+th:hover,th.sorted{color:var(--amber)}
+th .sa{margin-left:2px;opacity:.4;font-size:8px}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.015);cursor:pointer;transition:background .08s}
+tbody tr:hover{background:rgba(240,165,0,.03)}
+td{padding:7px 9px;font-size:10px;vertical-align:middle}
+.badge{display:inline-block;font-size:7px;font-weight:700;padding:2px 5px;border-radius:2px;letter-spacing:.08em;white-space:nowrap;text-transform:uppercase;border:1px solid}
+.ring{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1.5px solid;font-weight:700;font-size:9px}
+.pbar{height:3px;background:var(--bg4);border-radius:1px;overflow:hidden;margin-top:2px}
+.pfill{height:100%;border-radius:1px}
+.pl{font-size:7.5px;padding:2px 5px;border-radius:2px;text-decoration:none;font-family:var(--pmono);text-align:center;border:1px solid;white-space:nowrap;display:inline-block;transition:opacity .1s}
+.pl:hover{opacity:.7}
+
+/* ═══════════════════════════════ OPPORTUNITY MATRIX ════════════════════════ */
+#opp-matrix-wrap{
+  background:var(--bg1);border:1px solid var(--bd);border-radius:3px;padding:16px;
+}
+.om-title{font-family:var(--pdisplay);font-size:16px;font-style:italic;color:var(--cream);margin-bottom:4px;font-weight:600}
+.om-sub{font-family:var(--pmono);font-size:9px;color:var(--dim);margin-bottom:14px;letter-spacing:.06em}
+#matrix-svg{width:100%;cursor:crosshair}
+.q-label{font-family:var(--pdisplay);font-size:13px;font-weight:600;font-style:italic;opacity:.25;pointer-events:none}
+.axis-label{font-family:var(--pmono);font-size:9px;fill:var(--dim)}
+.matrix-tooltip{
+  position:fixed;background:var(--bg3);border:1px solid var(--bd3);border-radius:3px;
+  padding:10px 13px;pointer-events:none;z-index:500;min-width:220px;
+  font-family:var(--pmono);font-size:9.5px;box-shadow:0 8px 24px rgba(0,0,0,.6);
+  display:none;
+}
+.mt-head{font-family:var(--pdisplay);font-size:14px;font-weight:600;color:var(--cream);margin-bottom:6px}
+.mt-row{display:flex;justify-content:space-between;gap:20px;margin-bottom:2px;color:var(--muted)}
+.mt-val{color:var(--cream);font-weight:600}
+
+/* ═══════════════════════════════ IRR LAB ═══════════════════════════════════ */
+.irr-grid{display:grid;grid-template-columns:340px 1fr;gap:12px}
+.irr-picker{background:var(--bg1);border:1px solid var(--bd);border-radius:3px;padding:14px}
+.irr-picker-title{font-family:var(--pdisplay);font-size:14px;font-style:italic;color:var(--cream);margin-bottom:10px;font-weight:600}
+.deal-pick{
+  padding:8px 10px;border-radius:2px;border:1px solid var(--bd);
+  cursor:pointer;margin-bottom:4px;transition:all .12s;
+  background:var(--bg2);
+}
+.deal-pick:hover{border-color:var(--bd2);background:var(--bg3)}
+.deal-pick.sel{border-color:var(--amber);background:rgba(240,165,0,.05)}
+.dp-area{font-family:var(--pdisplay);font-size:12px;font-style:italic;color:var(--cream)}
+.dp-meta{font-family:var(--pmono);font-size:8.5px;color:var(--muted);margin-top:1px}
+.irr-model{background:var(--bg1);border:1px solid var(--bd);border-radius:3px;padding:16px}
+.irr-model-title{font-family:var(--pdisplay);font-size:16px;font-style:italic;color:var(--cream);margin-bottom:14px;font-weight:600}
+.irr-assumptions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.ia{background:var(--bg2);border:1px solid var(--bd);border-radius:2px;padding:9px}
+.ia-l{font-family:var(--pmono);font-size:7.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:5px}
+.ia-in{background:transparent;border:none;border-bottom:1px solid var(--bd2);color:var(--amber);font-family:var(--pmono);font-size:15px;font-weight:700;width:100%;outline:none;padding-bottom:2px}
+.ia-in:focus{border-bottom-color:var(--amber)}
+.irr-scenarios{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.sc{border-radius:3px;padding:12px;border:1px solid}
+.sc-label{font-family:var(--pmono);font-size:8px;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;font-weight:700}
+.sc-irr{font-family:var(--pmono);font-size:32px;font-weight:700;line-height:1;margin-bottom:4px}
+.sc-em{font-family:var(--pmono);font-size:12px;margin-bottom:2px}
+.sc-cap{font-family:var(--pmono);font-size:9px;opacity:.6}
+.sc-bear{background:rgba(212,64,64,.07);border-color:rgba(212,64,64,.2)}
+.sc-base{background:rgba(64,128,224,.07);border-color:rgba(64,128,224,.2)}
+.sc-bull{background:rgba(0,168,120,.07);border-color:rgba(0,168,120,.2)}
+.cf-table{width:100%;border-collapse:collapse;font-family:var(--pmono);font-size:9.5px}
+.cf-table th{background:var(--bg3);padding:5px 8px;text-align:right;font-size:7.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.09em;border-bottom:1px solid var(--bd)}
+.cf-table th:first-child{text-align:left}
+.cf-table td{padding:5px 8px;text-align:right;border-bottom:1px solid rgba(255,255,255,.02)}
+.cf-table td:first-child{text-align:left;color:var(--muted)}
+
+/* ═══════════════════════════════ AREA INTEL ════════════════════════════════ */
+.ai-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.ac{background:var(--bg1);border:1px solid var(--bd);border-radius:3px;padding:14px;transition:border-color .14s}
+.ac:hover{border-color:var(--bd2)}
+.ac-name{font-family:var(--pdisplay);font-size:15px;font-style:italic;color:var(--cream);font-weight:600;margin-bottom:10px}
+.ac-metrics{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.acm{background:var(--bg2);border-radius:2px;padding:6px 8px}
+.acm-l{font-family:var(--pmono);font-size:7.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.09em;margin-bottom:2px}
+.acm-v{font-family:var(--pmono);font-size:12px;font-weight:600}
+.risk-bar{height:3px;background:var(--bg4);border-radius:1px;margin-top:8px;overflow:hidden}
+.risk-fill{height:100%;border-radius:1px}
+.ac-drops{font-family:var(--pmono);font-size:9px;color:var(--muted);margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)}
+
+/* ═══════════════════════════════ PORTFOLIO ═════════════════════════════════ */
+.port-grid{display:grid;grid-template-columns:1fr 380px;gap:12px}
+.port-list-wrap{background:var(--bg1);border:1px solid var(--bd);border-radius:3px;padding:14px}
+.port-summary{background:var(--bg1);border:1px solid var(--bd);border-radius:3px;padding:14px}
+.port-title{font-family:var(--pdisplay);font-size:16px;font-style:italic;color:var(--cream);margin-bottom:12px;font-weight:600}
+.port-kpis{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:14px}
+.pk{background:var(--bg2);border:1px solid var(--bd);border-radius:2px;padding:9px}
+.pkl{font-family:var(--pmono);font-size:7.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.09em;margin-bottom:3px}
+.pkv{font-family:var(--pmono);font-size:18px;font-weight:700;color:var(--amber)}
+.port-item{
+  display:flex;align-items:center;gap:10px;padding:8px 10px;
+  border:1px solid var(--bd);border-radius:2px;margin-bottom:5px;
+  background:var(--bg2);transition:border-color .12s;
+}
+.port-item:hover{border-color:var(--bd2)}
+.pi-area{font-family:var(--pdisplay);font-size:12px;font-style:italic;color:var(--cream);flex:1}
+.pi-meta{font-family:var(--pmono);font-size:9px;color:var(--muted)}
+.pi-irr{font-family:var(--pmono);font-size:12px;font-weight:700;color:var(--teal2)}
+.pi-remove{background:transparent;border:none;color:var(--dim);cursor:pointer;font-size:12px;padding:2px 5px;border-radius:2px;transition:color .12s}
+.pi-remove:hover{color:var(--red2)}
+.add-btn-small{font-family:var(--pmono);font-size:8px;font-weight:700;border:none;padding:2px 7px;border-radius:2px;cursor:pointer;text-transform:uppercase;letter-spacing:.08em;transition:all .12s}
+.add-green{background:rgba(0,168,120,.15);color:var(--teal2);border:1px solid rgba(0,168,120,.25)}.add-green:hover{background:rgba(0,168,120,.25)}
+.added{background:rgba(240,165,0,.1);color:var(--amber);border:1px solid var(--bd2);cursor:default}
+
+/* ═══════════════════════════════ MODAL ════════════════════════════════════ */
+#ov{display:none;position:fixed;inset:0;background:rgba(3,5,8,.95);z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(12px)}
+#ov.open{display:flex}
+.modal{
+  background:var(--bg1);border:1px solid var(--bd2);border-top:2px solid var(--amber);
+  border-radius:4px;width:min(900px,96vw);max-height:94vh;overflow:auto;
+  padding:22px;animation:rise .2s cubic-bezier(.2,1,.4,1);
+}
+.m-tag{font-family:var(--pmono);font-size:8px;color:var(--amber);letter-spacing:.18em;text-transform:uppercase;margin-bottom:4px}
+.m-title{font-family:var(--pdisplay);font-size:22px;font-weight:700;font-style:italic;color:var(--cream);margin-bottom:3px;line-height:1.2}
+.m-sub{font-family:var(--pmono);font-size:9px;color:var(--muted);margin-bottom:14px}
+.m-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px}
+.mk{background:var(--bg2);border:1px solid var(--bd);border-radius:2px;padding:9px}
+.mkl{font-family:var(--pmono);font-size:7.5px;color:var(--dim);margin-bottom:3px;letter-spacing:.09em;text-transform:uppercase}
+.mkv{font-family:var(--pmono);font-size:15px;font-weight:700;line-height:1}
+.m-scenarios{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
+.m-ana{background:var(--bg);border:1px solid var(--bd);border-radius:3px;padding:13px;margin-bottom:11px}
+.m-ah{font-family:var(--pmono);font-size:8px;color:var(--amber);letter-spacing:.14em;text-transform:uppercase;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+#m-out{font-size:11px;line-height:1.8;color:var(--muted);white-space:pre-wrap;font-family:var(--psans)}
+.m-acts{display:flex;gap:7px;justify-content:flex-end;flex-wrap:wrap;align-items:center;margin-top:10px}
+.mpl{font-size:10px;padding:5px 12px;border-radius:2px;text-decoration:none;font-family:var(--pmono);border:1px solid;transition:all .12s}
+.mpl:hover{transform:translateY(-1px);opacity:.8}
+.m-note{font-family:var(--pmono);font-size:7.5px;color:var(--vdim);text-align:center;margin-top:8px}
+.cbtn{background:transparent;border:1px solid var(--bd);color:var(--dim);padding:4px 10px;border-radius:2px;cursor:pointer;font-family:var(--pmono);font-size:9px}
+.cbtn:hover{color:var(--muted)}
+.show-btn{background:transparent;border:1px solid var(--bd2);color:var(--amber);font-size:8.5px;padding:4px 10px;border-radius:2px;cursor:pointer;font-family:var(--pmono);letter-spacing:.08em;text-transform:uppercase}
+.show-btn:hover{background:rgba(240,165,0,.07)}
+
+footer{border-top:1px solid var(--bd);padding:9px 20px;display:flex;justify-content:space-between;font-family:var(--pmono);font-size:8px;color:var(--vdim);max-width:1900px;margin:0 auto}
+@media(max-width:1200px){.kstrip{grid-template-columns:repeat(4,1fr)}.m-kpis{grid-template-columns:repeat(3,1fr)}.irr-grid{grid-template-columns:1fr}.port-grid{grid-template-columns:1fr}}
+@media(max-width:768px){#main,#hdr .hi,footer{padding-left:10px;padding-right:10px}.kstrip{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<!-- TICKER -->
+<div id="ticker"><div class="tk" id="tk">
+  <span class="ti">DXB RE SCREENGULF PRICE INTELLIGENCE&nbsp;&nbsp;·&nbsp;&nbsp;DUBAI RESIDENTIAL RE INVESTMENT SCREENnbsp;GULF PRICE INTELLIGENCE&nbsp;&nbsp;·&nbsp;&nbsp;DUBAI RESIDENTIAL RE INVESTMENT SCREENnbsp;·GULF PRICE INTELLIGENCE&nbsp;&nbsp;·&nbsp;&nbsp;DUBAI RESIDENTIAL RE INVESTMENT SCREENnbsp;GULF PRICE INTELLIGENCE&nbsp;&nbsp;·&nbsp;&nbsp;DUBAI RESIDENTIAL RE INVESTMENT SCREENnbsp;DUBAI PROPERTY INVESTMENT SCREEN</span>
+  <span class="ti">HURDLE RATE: <span class="ta">7.5%</span></span>
+  <span class="ti">DLD BENCHMARK: DOWNTOWN <span class="ta">3,100</span> AED/SQFT</span>
+  <span class="ti">DLD BENCHMARK: MARINA <span class="ta">1,900</span> AED/SQFT</span>
+  <span class="ti">DLD BENCHMARK: SPRINGS <span class="ta">1,350</span> AED/SQFT</span>
+  <span class="ti">DXB RE SCREEN&nbsp;&nbsp;·&nbsp;&nbsp;DUBAI PROPERTY MONITOR&nbsp;&nbsp;·&nbsp;&nbsp;2026</span>
+  <span class="ti">DXB RE SCREENGULF PRICE INTELLIGENCE&nbsp;&nbsp;·&nbsp;&nbsp;DUBAI RESIDENTIAL RE INVESTMENT SCREENnbsp;GULF PRICE INTELLIGENCE&nbsp;&nbsp;·&nbsp;&nbsp;DUBAI RESIDENTIAL RE INVESTMENT SCREENnbsp;·GULF PRICE INTELLIGENCE&nbsp;&nbsp;·&nbsp;&nbsp;DUBAI RESIDENTIAL RE INVESTMENT SCREENnbsp;GULF PRICE INTELLIGENCE&nbsp;&nbsp;·&nbsp;&nbsp;DUBAI RESIDENTIAL RE INVESTMENT SCREENnbsp;DUBAI PROPERTY INVESTMENT SCREEN</span>
+  <span class="ti">HURDLE RATE: <span class="ta">7.5%</span></span>
+  <span class="ti">DLD BENCHMARK: DOWNTOWN <span class="ta">3,100</span> AED/SQFT</span>
+  <span class="ti">DLD BENCHMARK: MARINA <span class="ta">1,900</span> AED/SQFT</span>
+  <span class="ti">DLD BENCHMARK: SPRINGS <span class="ta">1,350</span> AED/SQFT</span>
+  <span class="ti">DXB RE SCREEN&nbsp;&nbsp;·&nbsp;&nbsp;DUBAI PROPERTY MONITOR&nbsp;&nbsp;·&nbsp;&nbsp;2026</span>
+</div></div>
+
+<!-- HEADER -->
+<div id="hdr">
+  <div class="hi">
+    <div class="brand">
+      <div class="bn">DXB <em>RE</em> Screen</div>
+      <div class="bs">Dubai Property Investment Screen</div>
+    </div>
+    <div class="nav-tabs">
+      <button class="nt on" onclick="tab('screen')">▸ Investment Screen</button>
+      <button class="nt"    onclick="tab('matrix')">◈ Opportunity Matrix</button>
+      <button class="nt"    onclick="tab('irr')">∑ IRR Lab</button>
+      <button class="nt"    onclick="tab('area')">⊕ Area Intelligence</button>
+      <button class="nt"    onclick="tab('port')">⊞ Portfolio Builder</button>
+    </div>
+    <div class="hright">
+      <span class="chip chip-live"><span class="dot"></span>LIVE</span>
+      <span class="chip chip-dim" id="c-dt">—</span>
+      <span class="chip chip-dim" id="c-ct">—</span>
+      <span class="chip chip-gold" id="c-hurdle">HURDLE 7.5%</span>
+      <div class="key-wrap">
+        <button id="key-btn" onclick="toggleKey()">⚿ API Key</button>
+        <div id="key-row">
+          <input id="key-in" type="password" placeholder="sk-ant-api03-…" autocomplete="off">
+          <button id="key-save" onclick="saveKey()">Save</button>
+        </div>
+        <div id="key-ok">
+          <span class="chip chip-live"><span class="dot"></span>AI READY</span>
+          <span style="font-family:var(--pmono);font-size:9px;color:var(--dim);cursor:pointer" onclick="clearKey()">[×]</span>
+        </div>
+      </div>
+      <button class="btn b-amber" id="btn-load" onclick="loadScreen()">▶ Run Screen</button>
+      <button class="btn b-dim" id="gh-btn" onclick="toggleGHPanel()" title="Connect your GitHub scraper for full coverage">⚙ GitHub</button>
+      <select id="mkt-mode" onchange="setMarketMode(this.value)" style="background:var(--bg2);border:1px solid var(--bd2);color:var(--amber);padding:5px 8px;border-radius:2px;font-family:var(--pmono);font-size:9px;outline:none;cursor:pointer" title="Market assumptions affect vacancy, rent haircut and IRR">
+        <option value="normal">Market: Normal</option>
+        <option value="stressed" selected>Market: Stressed ✓</option>
+        <option value="distressed">Market: Distressed</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div id="main">
+
+<!-- ══════════════════ INVESTMENT SCREEN TAB ══════════════════ -->
+<div id="tab-screen">
+
+  <!-- KPI Strip -->
+  <div class="kstrip" id="kstrip">
+    <div class="kc" style="--kc:var(--teal2)"><div class="kl">Strong Buy</div><div class="kv" id="k-sb">—</div><div class="ks">score ≥8</div></div>
+    <div class="kc" style="--kc:var(--blue2)"><div class="kl">Buy</div><div class="kv" id="k-b">—</div><div class="ks">score 6–8</div></div>
+    <div class="kc" style="--kc:var(--amber)"><div class="kl">Watch</div><div class="kv" id="k-w">—</div><div class="ks">score 4–6</div></div>
+    <div class="kc" style="--kc:var(--red)"><div class="kl">Pass</div><div class="kv" id="k-p">—</div><div class="ks">score &lt;4</div></div>
+    <div class="kc" style="--kc:var(--amber)"><div class="kl">Avg Gross Yield</div><div class="kv" id="k-y">—</div><div class="ks">at ask</div></div>
+    <div class="kc" style="--kc:var(--teal2)"><div class="kl">Avg Base IRR</div><div class="kv" id="k-irr">—</div><div class="ks">3yr base case</div></div>
+    <div class="kc" style="--kc:var(--blue2)"><div class="kl">Total Capital</div><div class="kv" id="k-cap">—</div><div class="ks">screened deals</div></div>
+    <div class="kc" style="--kc:var(--amber)"><div class="kl">Avg Discount to NAV</div><div class="kv" id="k-nav">—</div><div class="ks">vs DLD comps</div></div>
+  </div>
+
+  <!-- Data transparency strip -->
+  <div id="data-strip" style="display:none;background:var(--bg1);border:1px solid var(--bd);border-left:3px solid var(--amber);border-radius:2px;padding:8px 14px;margin-bottom:10px;font-family:var(--pmono);font-size:9px;line-height:1.9">
+    <div style="display:flex;gap:28px;flex-wrap:wrap;align-items:center">
+      <span style="color:var(--amber);font-weight:700;letter-spacing:.1em">DATA SOURCES</span>
+      <span style="color:var(--dim)"><span style="color:var(--muted)">Price drop %</span> — Seller's own Bayut asking price reduction (not a DLD transaction). Source: PanicSelling.com, 21 Mar 2026.</span>
+      <span style="color:var(--dim)"><span style="color:var(--muted)">DLD NAV</span> — Computed as listing sqft × DLD avg PSF (Feb 2026, E&V/DXB Analytics). <span style="color:var(--teal2)">●</span> HIGH = PSF×sqft · <span style="color:var(--amber)">●</span> MEDIUM = avg transaction fallback.</span>
+      <span style="color:var(--dim)"><span style="color:var(--muted)">Yields/IRR</span> — Bayut/RERA market data, adjusted for selected market mode. IRR: Newton-Raphson, 3yr hold, 4% DLD entry fee.</span>
+      <span id="mkt-note" style="color:var(--amber)"></span>
+    </div>
+  </div>
+
+  <!-- Grade Summary Cards -->
+  <div class="grade-row" id="grade-row" style="display:none">
+    <div class="grade-card" onclick="filterGrade('STRONG BUY')">
+      <div><span class="gc-badge g-sb">STRONG BUY</span></div>
+      <div><div class="gc-n" style="color:var(--teal2)" id="gc-sb">0</div><div class="gc-l">opportunities</div></div>
+    </div>
+    <div class="grade-card" onclick="filterGrade('BUY')">
+      <div><span class="gc-badge g-b">BUY</span></div>
+      <div><div class="gc-n" style="color:var(--blue2)" id="gc-b">0</div><div class="gc-l">opportunities</div></div>
+    </div>
+    <div class="grade-card" onclick="filterGrade('WATCH')">
+      <div><span class="gc-badge g-w">WATCH</span></div>
+      <div><div class="gc-n" style="color:var(--amber)" id="gc-w">0</div><div class="gc-l">opportunities</div></div>
+    </div>
+    <div class="grade-card" onclick="filterGrade('PASS')">
+      <div><span class="gc-badge g-p">PASS</span></div>
+      <div><div class="gc-n" style="color:var(--red2)" id="gc-p">0</div><div class="gc-l">opportunities</div></div>
+    </div>
+    <div class="grade-card" style="cursor:default" onclick="filterGrade('')">
+      <div><span style="font-family:var(--pmono);font-size:9px;color:var(--dim);border:1px solid var(--bd);padding:3px 8px;border-radius:2px">SHOW ALL</span></div>
+      <div><div class="gc-n" style="color:var(--muted)" id="gc-all">0</div><div class="gc-l">total screened</div></div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="ctrl" id="ctrl" style="display:none">
+    <input  class="fsrch" id="fq"  placeholder="Search area or title…" oninput="render()">
+    <select class="fsel"  id="fg"  onchange="render()"><option value="">All Grades</option></select>
+    <select class="fsel"  id="fa"  onchange="render()"><option value="">All Areas</option></select>
+    <select class="fsel"  id="ft"  onchange="render()"><option value="">All Types</option><option>Apartment</option><option>Villa</option><option>Townhouse</option></select>
+    <select class="fsel"  id="fb"  onchange="render()"><option value="">All Beds</option><option value="0">Studio</option><option value="1">1BR</option><option value="2">2BR</option><option value="3">3BR</option><option value="4">4BR</option><option value="5">5BR+</option></select>
+    <select class="fsel"  id="fym" onchange="render()"><option value="0">Any Yield</option><option value="5">≥5%</option><option value="6">≥6%</option><option value="7">≥7%</option><option value="8">≥8%</option></select>
+    <select class="fsel"  id="fir" onchange="render()"><option value="0">Any IRR</option><option value="8">Base IRR ≥8%</option><option value="10">Base IRR ≥10%</option><option value="15">Base IRR ≥15%</option></select>
+    <select class="fsel"  id="fso" onchange="render()">
+      <option value="score">Sort: Deal Score</option>
+      <option value="irr_base">Sort: Base IRR</option>
+      <option value="yield">Sort: Gross Yield</option>
+      <option value="discount">Sort: Discount to NAV</option>
+      <option value="drop">Sort: Price Drop</option>
+      <option value="saved">Sort: AED Saved</option>
+      <option value="price_asc">Sort: Lowest Price</option>
+    </select>
+    <span class="fct" id="fct"></span>
+  </div>
+
+  <!-- GitHub Config Panel -->
+  <div id="gh-panel" style="display:none;background:var(--bg1);border:1px solid var(--bd2);border-left:3px solid var(--teal2);border-radius:3px;padding:12px 16px;margin-bottom:10px">
+    <div style="font-family:var(--pmono);font-size:9px;color:var(--teal2);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px;font-weight:700">⬡ Connect GitHub Scraper — All Dubai Areas</div>
+    <div style="font-family:var(--pmono);font-size:9px;color:var(--dim);margin-bottom:10px;line-height:1.7">
+      Enter your GitHub username and repo name. The screen reads <code style="color:var(--amber)">drops.json</code> from your scraper repo — giving you all areas including The Springs, Meadows, Arabian Ranches, with drops as low as 1%.
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <label style="font-family:var(--pmono);font-size:8px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase">GitHub Username</label>
+        <input id="gh-user" type="text" placeholder="e.g. johnsmith"
+          style="background:var(--bg2);border:1px solid var(--bd2);color:var(--cream);padding:5px 10px;border-radius:2px;font-family:var(--pmono);font-size:11px;outline:none;width:180px"
+          oninput="previewGHUrl()">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <label style="font-family:var(--pmono);font-size:8px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase">Repository Name</label>
+        <input id="gh-repo" type="text" placeholder="e.g. dxb-screen"
+          style="background:var(--bg2);border:1px solid var(--bd2);color:var(--cream);padding:5px 10px;border-radius:2px;font-family:var(--pmono);font-size:11px;outline:none;width:180px"
+          oninput="previewGHUrl()">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px;margin-top:16px">
+        <button class="btn b-teal" onclick="saveGHConfig()">Save & Run Screen</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3px;margin-top:16px">
+        <button class="btn b-dim" onclick="clearGHConfig()">Clear</button>
+      </div>
+    </div>
+    <div id="gh-preview" style="font-family:var(--pmono);font-size:9px;color:var(--dim);margin-top:8px"></div>
+  <!-- Empty state -->
+  <div id="empty" style="padding:80px 20px;text-align:center">
+    <div style="font-family:var(--pdisplay);font-size:20px;font-style:italic;color:var(--muted);margin-bottom:8px">Screen not yet loaded</div>
+    <div style="font-family:var(--pmono);font-size:10px;color:var(--dim);line-height:1.9;max-width:480px;margin:0 auto">
+      Click <strong style="color:var(--amber)">▶ Run Screen</strong> to fetch all live Dubai price drops, score them on 5 institutional factors, calculate 3-scenario IRR for every deal, and rank opportunities by investment merit.<br><br>
+      No API key required for a full analysis of the verified seed dataset.
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div id="tbl-sec" style="display:none">
+    <div class="tw">
+      <table>
+        <thead><tr id="thead"></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════ OPPORTUNITY MATRIX TAB ══════════════════ -->
+<div id="tab-matrix" style="display:none">
+  <div id="opp-matrix-wrap">
+    <div class="om-title">Opportunity Matrix — Discount to NAV vs Gross Yield</div>
+    <div class="om-sub">Each dot = one deal · Size = AED saved · Colour = investment grade · Hover for summary · Click to open full analysis</div>
+    <svg id="matrix-svg" viewBox="0 0 900 520" preserveAspectRatio="xMidYMid meet"></svg>
+  </div>
+  <div class="matrix-tooltip" id="mtt"></div>
+</div>
+
+<!-- ══════════════════ IRR LAB TAB ══════════════════ -->
+<div id="tab-irr" style="display:none">
+  <div class="irr-grid">
+    <div class="irr-picker">
+      <div class="irr-picker-title">Select a deal</div>
+      <div id="irr-list" style="max-height:calc(100vh - 200px);overflow:auto"></div>
+    </div>
+    <div class="irr-model" id="irr-panel">
+      <div style="padding:60px 20px;text-align:center;color:var(--dim);font-family:var(--pmono);font-size:10px">
+        Select a deal from the left panel to load the IRR model
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ AREA INTELLIGENCE TAB ══════════════════ -->
+<div id="tab-area" style="display:none">
+  <div style="margin-bottom:14px">
+    <div style="font-family:var(--pdisplay);font-size:18px;font-style:italic;color:var(--cream);font-weight:600;margin-bottom:3px">Area Intelligence</div>
+    <div style="font-family:var(--pmono);font-size:9px;color:var(--dim)">Supply risk · demand drivers · liquidity · price trend · rental yield · active drops — all Dubai focus areas</div>
+  </div>
+  <div class="ai-grid" id="area-grid"></div>
+</div>
+
+<!-- ══════════════════ PORTFOLIO BUILDER TAB ══════════════════ -->
+<div id="tab-port" style="display:none">
+  <div class="port-grid">
+    <div class="port-list-wrap">
+      <div style="font-family:var(--pdisplay);font-size:16px;font-style:italic;color:var(--cream);font-weight:600;margin-bottom:10px">Deal List — Click to add to portfolio</div>
+      <div class="ctrl" style="margin-bottom:8px">
+        <select class="fsel" id="pa-fa" onchange="renderPortPicker()"><option value="">All Areas</option></select>
+        <select class="fsel" id="pa-fg" onchange="renderPortPicker()"><option value="">All Grades</option></select>
+      </div>
+      <div id="port-picker" style="max-height:calc(100vh - 240px);overflow:auto"></div>
+    </div>
+    <div class="port-summary">
+      <div class="port-title">Portfolio Summary</div>
+      <div class="port-kpis" id="port-kpis">
+        <div class="pk"><div class="pkl">Total Capital</div><div class="pkv" id="pk-cap">—</div></div>
+        <div class="pk"><div class="pkl">Blended Yield</div><div class="pkv" id="pk-yld">—</div></div>
+        <div class="pk"><div class="pkl">Blended Base IRR</div><div class="pkv" id="pk-irr">—</div></div>
+        <div class="pk"><div class="pkl">Blended Score</div><div class="pkv" id="pk-sc">—</div></div>
+        <div class="pk"><div class="pkl">Annual NOI</div><div class="pkv" id="pk-noi">—</div></div>
+        <div class="pk"><div class="pkl">Deals in Portfolio</div><div class="pkv" id="pk-n">0</div></div>
+      </div>
+      <div style="font-family:var(--pmono);font-size:9px;color:var(--dim);margin-bottom:10px">Portfolio Holdings</div>
+      <div id="port-items">
+        <div style="padding:24px;text-align:center;color:var(--dim);font-family:var(--pmono);font-size:10px;border:1px dashed var(--vdim);border-radius:2px">
+          No deals added yet.<br>Click any deal from the left panel.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<footer>
+  <span>Data: Bayut · PanicSelling.com · DLD Reference · March 2026</span>
+  <span></span>
+</footer>
+
+<!-- MODAL -->
+<div id="ov" onclick="closeMd(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+      <div>
+        <div class="m-tag" id="m-tag">DXB RE SCREEN · DEAL ANALYSIS</div>
+        <div class="m-title" id="m-title"></div>
+        <div class="m-sub"  id="m-sub"></div>
+      </div>
+      <button class="cbtn" onclick="document.getElementById('ov').classList.remove('open')">✕ Close</button>
+    </div>
+    <div class="m-kpis" id="m-kpis"></div>
+    <div class="m-scenarios" id="m-scenarios"></div>
+    <div class="m-ana">
+      <div class="m-ah">
+        <span id="m-aht">◈ Investment Analysis</span>
+        <button class="show-btn" id="m-show" onclick="showAnalysis()">Generate Analysis →</button>
+      </div>
+      <div id="m-out" style="color:var(--dim);font-size:10px;font-family:var(--pmono)">Click "Generate Analysis" for full investment memo — deal thesis, risk factors, IRR narrative and bid recommendation.</div>
+    </div>
+    <div class="m-acts" id="m-acts"></div>
+    <div class="m-note">DLD reference benchmarks · Hurdle rate 7.5% · Indicative only · Not investment advice</div>
+  </div>
+</div>
+
+<script>
+/* ╔══════════════════════════════════════════════════════════════════════════╗
+   ║  DXB RE SCREEN — DUBAI PROPERTY INVESTMENT MONITOR            ║
+   ║  Real Estate Screen                                             ║
+   ╚══════════════════════════════════════════════════════════════════════════╝ */
+
+/* ══════════════════════ REFERENCE DATA ══════════════════════════════════════ */
+const HURDLE = 7.5;   // % — fund hurdle rate
+const DLD_FEE = 0.04; // 4% DLD transfer fee
+const OPEX = 0.15; // 15% operating expense ratio (property mgmt, maintenance, insurance, service charges)
+
+// DLD average transaction PSF — Feb 2026 actual DLD completed sales data
+// Sources: Engel & Völkers Dubai Feb 2026, DXB Analytics Jan 2026 (16,919 DLD transactions),
+//          Property Monitor, Knight Frank Q1 2025 updated for Q1 2026 trajectory (+10-13% YoY)
+// Methodology: DLD NAV = listing_sqft × area_PSF (per type where data exists)
+// These are COMPLETED SALE averages, not asking prices. Higher than asking prices in distressed market.
+const DLD_SQFT = {
+  // Core — sourced directly from DXB Analytics / E&V Feb 2026 DLD data
+  'Downtown Dubai':           2980,  // E&V Feb 2026: 2,980 AED/sqft (apartments)
+  'Dubai Marina':             2061,  // E&V Feb 2026: 2,061 AED/sqft
+  'Palm Jumeirah':            3950,  // DXB Analytics Jan 2026: ~4,000 AED/sqft
+  'Business Bay':             2673,  // E&V Feb 2026: 2,673 AED/sqft
+  'Jumeirah Village Circle':  1448,  // E&V Feb 2026: 1,448 AED/sqft
+  'Jumeirah Beach Residence': 2450,  // JBR: waterfront premium, ~19% above Marina
+  'DIFC':                     3500,  // DIFC premium, Knight Frank Q1 2025 + growth
+  'Emaar Beachfront':         3100,  // Premium new Emaar waterfront product
+  'Bluewaters Island':        3400,  // Ultra-premium island product
+  // Villa communities — villas avg AED 2,277/sqft market-wide Feb 2026 (E&V)
+  'Dubai Hills Estate':       2200,  // Premium Emaar villa/apt: above market avg
+  'Arabian Ranches':          1850,  // Mature Emaar villa community
+  'Arabian Ranches 2':        1750,  // AR2 slight discount to AR1
+  'Arabian Ranches 3':        1650,  // AR3 newest, some off-plan discount
+  'The Springs':              1750,  // Emirates Living: refurbished homes, constrained supply
+  'The Meadows':              2100,  // Premium Emirates Living: above Springs
+  'The Lakes':                1900,  // Lakes: between Springs and Meadows
+  'Jumeirah Golf Estates':    1900,  // Golf community premium
+  'Tilal Al Ghaf':            2000,  // Emerging luxury lagoon community
+  // Mid-market
+  'Dubai Creek Harbour':      1900,  // Emaar waterfront, maturing
+  'Jumeirah Lake Towers':     1400,  // Older stock, JLT metro
+  'Damac Hills':              1450,  // Golf community, Damac product
+  'Damac Hills 2':             920,  // Affordable, high pipeline
+  'Meydan':                   1700,  // Downtown adjacency premium
+  'Al Barsha':                1150,  // School hub, value urban
+  'Dubai South':               980,  // Airport corridor, high pipeline
+  'Town Square':              1020,  // Affordable family community
+  'Mudon':                    1350,  // Villa townhouse, mature
+  'Al Furjan':                1250,  // Mid-market, metro access
+  'Motor City':               1100,  // Older mid-market
+  'City Walk':                2800,  // Trophy lifestyle district
+  'Jumeirah':                 2200,  // Prime Jumeirah strip
+};
+
+// PSF by type modifier (E&V Feb 2026: villas 2,277 vs apts 2,006 = +13.5%)
+// Applied in DLD NAV calculation to adjust for property type
+const PSF_TYPE_MOD = { 'Villa': 1.14, 'Townhouse': 0.70, 'Apartment': 1.00, 'Penthouse': 1.30 };
+// Note: Townhouse at 0.70 because townhouse avg is 1,397 vs apartment avg 2,006 market-wide
+
+// ── MARKET CONDITIONS ──────────────────────────────────────────────────────
+// Mar 2026: regional geopolitical uncertainty, reduced foreign buyer demand
+// 90k units completing 2025, 120k in 2026 → rental market supply pressure on apts
+// Villas/Emirates Living: supply constrained, rents holding
+const MARKET_MODE = { NORMAL: 'normal', STRESSED: 'stressed', DISTRESSED: 'distressed' };
+let CURRENT_MARKET = MARKET_MODE.STRESSED; // Default: current market conditions
+
+const MARKET_PARAMS = {
+  normal:      { vacancy: 0.08, rentHaircut: 1.00, label: 'Normal',     note: 'Pre-conflict assumptions' },
+  stressed:    { vacancy: 0.12, rentHaircut: 0.90, label: 'Stressed',   note: 'Current: geopolitical discount, elevated vacancy' },
+  distressed:  { vacancy: 0.18, rentHaircut: 0.80, label: 'Distressed', note: 'Tail risk: prolonged conflict + recession' },
+};
+
+// ── DLD NAV CALCULATOR ──────────────────────────────────────────────────────
+// NAV = listing_sqft × area_PSF × type_modifier
+// If no sqft available, use FALLBACK_PRICE lookup (DLD transaction price avg by area/type/beds)
+// Confidence: HIGH if sqft known + area PSF verified, MEDIUM if fallback used
+function calcDLDNAV(area, type, beds, sqft) {
+  const areaPSF = DLD_SQFT[area];
+  if (areaPSF && sqft) {
+    // Primary method: PSF × area × type modifier
+    const typeMod = PSF_TYPE_MOD[type] || 1.0;
+    const nav = Math.round(areaPSF * typeMod * sqft / 100000) * 100000;
+    return { nav, psf: areaPSF, method: 'PSF×sqft', confidence: 'HIGH' };
+  }
+  // Fallback: hardcoded DLD transaction averages by area/type/beds
+  const fp = FALLBACK_PRICE[area]?.[type]?.[beds] || FALLBACK_PRICE[area]?.[type]?.[1];
+  if (fp) return { nav: fp, psf: null, method: 'Avg transaction', confidence: 'MEDIUM' };
+  return { nav: null, psf: null, method: null, confidence: 'LOW' };
+}
+
+// Fallback DLD transaction price averages (for listings without sqft data)
+// Source: DLD open data, DrivenProperties, Property Monitor — 12M trailing to Jan 2026
+const FALLBACK_PRICE = {
+  'Downtown Dubai':       {'Apartment':{0:1900000,1:2600000,2:4500000,3:9000000}},
+  'Dubai Marina':         {'Apartment':{0:1100000,1:1800000,2:2800000,3:5200000,4:14000000}},
+  'Palm Jumeirah':        {'Apartment':{2:6500000,3:11000000},'Villa':{4:32000000}},
+  'Business Bay':         {'Apartment':{1:1600000,2:2500000,3:4500000},'Townhouse':{3:4800000,4:5500000}},
+  'Jumeirah Village Circle':{'Apartment':{0:650000,1:1000000,2:1750000,3:3000000},'Townhouse':{3:3000000}},
+  'Dubai Hills Estate':   {'Apartment':{2:2500000,3:3800000},'Villa':{3:8500000,4:11000000}},
+  'Arabian Ranches':      {'Villa':{3:6200000,4:9500000,5:14000000}},
+  'DIFC':                 {'Apartment':{1:2800000,2:5000000}},
+  'Emaar Beachfront':     {'Apartment':{1:4200000,2:7000000,3:12000000}},
+  'Dubai Creek Harbour':  {'Apartment':{1:1800000,2:3000000,3:4800000}},
+  'Damac Hills':          {'Villa':{3:4800000,4:6500000},'Apartment':{1:1050000,2:1650000}},
+  'Jumeirah Beach Residence':{'Apartment':{0:1200000,1:3200000,2:5000000,3:7500000,4:12500000}},
+  'Jumeirah Lake Towers': {'Apartment':{0:1000000,1:1400000,2:2200000,3:3600000}},
+  'The Springs':          {'Villa':{2:2600000,3:3400000,4:4400000},'Townhouse':{2:2500000,3:3200000}},
+  'The Meadows':          {'Villa':{3:6000000,4:8500000,5:12500000}},
+  'Al Barsha':            {'Apartment':{1:1050000,2:1700000,3:2700000}},
+  'Meydan':               {'Apartment':{1:1300000,2:2000000},'Villa':{4:8500000}},
+  'Dubai South':          {'Apartment':{0:530000,1:780000,2:1250000}},
+  'Tilal Al Ghaf':        {'Villa':{4:8000000,5:12000000}},
+};
+
+// Gross rental yields — based on RERA registered contracts, Bayut/PF market data Q4 2025
+// STRESSED (current) mode applies 10% haircut to these via MARKET_PARAMS.rentHaircut
+// Sources: DrivenProperties market guide, Bayut yield data, Knight Frank Q3 2025
+// Gross yields (before vacancy, opex): gross rent / purchase price
+const YIELDS = {
+  // Prime / Trophy — compressed yields, capital appreciation play
+  'Downtown Dubai':          {'Apartment':{0:.060,1:.056,2:.050,3:.045}},
+  'Dubai Marina':            {'Apartment':{0:.066,1:.063,2:.059,3:.055,4:.050}},
+  'Palm Jumeirah':           {'Apartment':{1:.053,2:.049,3:.044},'Villa':{4:.042,5:.038}},
+  'DIFC':                    {'Apartment':{1:.060,2:.055}},
+  'Bluewaters Island':       {'Apartment':{1:.052,2:.047}},
+  'City Walk':               {'Apartment':{1:.055,2:.050}},
+  // Waterfront premium
+  'Jumeirah Beach Residence':{'Apartment':{0:.062,1:.060,2:.057,3:.053,4:.048}},
+  'Emaar Beachfront':        {'Apartment':{1:.056,2:.052,3:.048}},
+  // Business districts
+  'Business Bay':            {'Apartment':{1:.070,2:.067,3:.062},'Townhouse':{3:.060,4:.056}},
+  'Dubai Creek Harbour':     {'Apartment':{1:.062,2:.059,3:.055}},
+  'Meydan':                  {'Apartment':{1:.062,2:.059},'Villa':{4:.056}},
+  // Villa communities — supply constrained, rents resilient
+  'Dubai Hills Estate':      {'Apartment':{2:.059,3:.055},'Villa':{3:.051,4:.050}},
+  'Arabian Ranches':         {'Villa':{3:.049,4:.047,5:.042}},
+  'Arabian Ranches 2':       {'Villa':{3:.050,4:.048}},
+  'Arabian Ranches 3':       {'Villa':{3:.052,4:.050}},
+  'The Springs':             {'Villa':{2:.059,3:.056,4:.053},'Townhouse':{2:.059,3:.056}},
+  'The Meadows':             {'Villa':{3:.054,4:.051,5:.047}},
+  'The Lakes':               {'Villa':{3:.053,4:.050}},
+  'Jumeirah Golf Estates':   {'Villa':{3:.050,4:.047}},
+  'Tilal Al Ghaf':           {'Villa':{4:.052,5:.048}},
+  // Mid-market / high yield
+  'Jumeirah Village Circle': {'Apartment':{0:.078,1:.075,2:.071,3:.068},'Townhouse':{3:.072}},
+  'Jumeirah Lake Towers':    {'Apartment':{0:.073,1:.069,2:.066,3:.063}},
+  'Al Barsha':               {'Apartment':{1:.067,2:.063,3:.059}},
+  'Damac Hills':             {'Villa':{3:.053,4:.051},'Apartment':{1:.056,2:.053}},
+  'Damac Hills 2':           {'Apartment':{2:.065,3:.062},'Villa':{3:.060}},
+  'Al Furjan':               {'Apartment':{1:.070,2:.067}},
+  'Dubai South':             {'Apartment':{0:.082,1:.079,2:.076}},
+  'Town Square':             {'Apartment':{1:.072,2:.069}},
+  'Mudon':                   {'Townhouse':{3:.058,4:.055}},
+  'Jumeirah':                {'Apartment':{1:.060,2:.056}},
+};
+
+// Area intelligence: supply risk (1-5), demand score (1-10), liquidity (1-3), yoy price trend %, off-plan pipeline
+const AREA_INTEL = {
+  'Downtown Dubai':          {supply:2,demand:9,liquidity:3,yoy:+7,pipeline:'Medium',type:'Trophy / HNWI',thesis:'Iconic demand anchor; limited new supply; strong STR market'},
+  'Dubai Marina':            {supply:2,demand:9,liquidity:3,yoy:+5,pipeline:'Low',type:'Prime Waterfront',thesis:'Deep liquidity; high rental absorption; JBR spillover demand'},
+  'Palm Jumeirah':           {supply:1,demand:9,liquidity:2,yoy:+12,pipeline:'Very Low',type:'Ultra-Luxury',thesis:'Supply inelastic; UHNW / trophy asset; visa anchor demand'},
+  'Jumeirah Beach Residence':{supply:1,demand:8,liquidity:3,yoy:+6,pipeline:'Very Low',type:'Prime Beachfront',thesis:'No new comparable supply possible; strong holidaylet demand'},
+  'Business Bay':            {supply:3,demand:7,liquidity:3,yoy:+4,pipeline:'High',type:'Commercial Residential',thesis:'High off-plan overhang; rental yields attractive; watch supply'},
+  'Dubai Hills Estate':      {supply:2,demand:8,liquidity:2,yoy:+8,pipeline:'Medium',type:'Emerging Premium',thesis:'Emaar quality; school catchment demand; villa undersupply'},
+  'Jumeirah Village Circle': {supply:5,demand:6,liquidity:2,yoy:+2,pipeline:'Very High',type:'Mid-Market',thesis:'Severe off-plan pipeline; yield play only; cap appreciation limited'},
+  'The Springs':             {supply:1,demand:8,liquidity:2,yoy:+5,pipeline:'Very Low',type:'Family Villa / Emirates Living',thesis:'No new supply possible (completed 2004); strong family end-user demand; rents rising'},
+  'The Meadows':             {supply:1,demand:8,liquidity:2,yoy:+7,pipeline:'Very Low',type:'Family Villa / Emirates Living',thesis:'Premium Emirates Living; school proximity; structurally undersupplied'},
+  'Arabian Ranches':         {supply:1,demand:8,liquidity:2,yoy:+6,pipeline:'Low',type:'Premium Villa Community',thesis:'Emaar brand; equestrian lifestyle; strong family demand; JESS catchment'},
+  'DIFC':                    {supply:1,demand:9,liquidity:1,yoy:+10,pipeline:'Very Low',type:'CBD Trophy',thesis:'Financial centre address premium; DIFC courts / legal hub; very limited stock'},
+  'Emaar Beachfront':        {supply:2,demand:8,liquidity:1,yoy:+9,pipeline:'Medium',type:'Luxury Waterfront',thesis:'New flagship Emaar product; strong post-handover appreciation; limited resale stock'},
+  'Dubai Creek Harbour':     {supply:3,demand:7,liquidity:2,yoy:+5,pipeline:'High',type:'Emerging Waterfront',thesis:'Significant pipeline; long-term play; downtown adjacency; patience required'},
+  'Damac Hills':             {supply:3,demand:7,liquidity:2,yoy:+3,pipeline:'High',type:'Golf Community',thesis:'Golf course amenity premium; high pipeline; yield play vs capital growth trade-off'},
+  'Jumeirah Lake Towers':    {supply:3,demand:7,liquidity:3,yoy:+3,pipeline:'Medium',type:'Value Urban',thesis:'JLT metro access; corporate rental demand; older stock; repositioning value'},
+  'Meydan':                  {supply:2,demand:7,liquidity:1,yoy:+6,pipeline:'Medium',type:'Premium Community',thesis:'Racecourse premium; Downtown adjacency; limited villa stock'},
+  'Al Barsha':               {supply:2,demand:7,liquidity:2,yoy:+3,pipeline:'Low',type:'Affordable Urban',thesis:'Mall of Emirates access; school hub; value entry for patient capital'},
+  'Dubai South':             {supply:4,demand:6,liquidity:2,yoy:+4,pipeline:'Very High',type:'Affordable / Airport',thesis:'Expo legacy; Al Maktoum Airport growth play; high pipeline risk near-term'},
+};
+
+// VERIFIED real listings — Bayut IDs scraped from PanicSelling.com 21 March 2026
+const SEEDS = [
+  {id:'14328167',area:'Downtown Dubai',          type:'Apartment',beds:2,ask:4400000,was:6000000,drop:-26.7,sqft:1660,title:'Amazing 2 Beds In Downtown 1 Min From Burj Khalifa',agency:'fäm Properties'},
+  {id:'13717355',area:'Jumeirah Beach Residence',type:'Apartment',beds:3,ask:4800000,was:5700000,drop:-15.8,sqft:2260,title:'Exclusive Private Beach Living | Corner | Vacant',agency:'AKT Real Estate'},
+  {id:'14533453',area:'Jumeirah Beach Residence',type:'Apartment',beds:3,ask:9700000,was:11480000,drop:-15.6,sqft:1923,title:'Best Price | Exclusive | Large | 5 Star Living',agency:'Hamptons International'},
+  {id:'13983957',area:'Dubai Hills Estate',      type:'Villa',    beds:4,ask:10500000,was:12000000,drop:-12.5,sqft:3627,title:'Fully Upgraded | Vacant on Transfer | Park View',agency:'Savills Dubai'},
+  {id:'13099361',area:'Jumeirah Beach Residence',type:'Apartment',beds:3,ask:14000000,was:16000000,drop:-12.5,sqft:3223,title:'Stunning 3BR in High Floor | Panoramic Views',agency:'Benchmark Properties'},
+  {id:'13746756',area:'Downtown Dubai',          type:'Apartment',beds:2,ask:2530000,was:2890000,drop:-12.5,sqft:1004,title:'Luxury 2BR Fully Furnished | High Demand Location',agency:'Next Level Real Estate'},
+  {id:'14521191',area:'Jumeirah Village Circle', type:'Apartment',beds:0,ask:699000,was:795000,drop:-12.1,sqft:461,title:'30/70 Payment Plan | Venice | Studio',agency:'Vantage Capital'},
+  {id:'14520863',area:'Jumeirah Village Circle', type:'Apartment',beds:2,ask:1810000,was:2055000,drop:-11.9,sqft:1246,title:'30/70 Payment Plan | Bergamo | 2 Bed + Maid',agency:'Vantage Capital'},
+  {id:'14490343',area:'Dubai Hills Estate',      type:'Villa',    beds:3,ask:8680000,was:9800000,drop:-11.4,sqft:4786,title:'Extended | Private Pool | Close to Park',agency:'LuxuryX Agents'},
+  {id:'14472116',area:'Dubai Hills Estate',      type:'Villa',    beds:3,ask:8680000,was:9800000,drop:-11.4,sqft:4786,title:'Upgraded | Extended | Private Pool',agency:'fäm Properties'},
+  {id:'14521315',area:'Jumeirah Village Circle', type:'Apartment',beds:1,ask:1070000,was:1198000,drop:-10.7,sqft:768,title:'30/70 Payment Plan | Naples | 1 Bed + Walk-in',agency:'Vantage Capital'},
+  {id:'14445962',area:'Dubai Marina',            type:'Apartment',beds:0,ask:1250000,was:1400000,drop:-10.7,sqft:413,title:'Full Marina View | Vacant on Transfer | High ROI',agency:'Banke International'},
+  {id:'14521851',area:'Jumeirah Village Circle', type:'Apartment',beds:1,ask:1260000,was:1397000,drop:-9.8,sqft:902,title:'30/70 Payment Plan | Verona | Junior 2 Bed',agency:'Vantage Capital'},
+  {id:'14451664',area:'Dubai Marina',            type:'Apartment',beds:4,ask:14900000,was:16500000,drop:-9.7,sqft:3789,title:'Premium High Floor | Sea View | Vacant',agency:'Idigov Real Estate'},
+  {id:'14317902',area:'Jumeirah Beach Residence',type:'Apartment',beds:0,ask:1100000,was:1200000,drop:-8.3,sqft:435,title:'Luxury Living | Elegant Studio | JBR',agency:'Advisors Properties'},
+  {id:'14072787',area:'Downtown Dubai',          type:'Apartment',beds:0,ask:1150000,was:1250000,drop:-8.0,sqft:522,title:'Partial Downtown View | Fully Furnished',agency:'Alhad Real Estate'},
+  {id:'14244281',area:'Jumeirah Village Circle', type:'Apartment',beds:1,ask:1250000,was:1345000,drop:-7.1,sqft:807,title:'Premium & Exclusive 1 Bed + Private Pool',agency:'You & House'},
+  {id:'14152796',area:'Dubai Marina',            type:'Apartment',beds:2,ask:2700000,was:2900000,drop:-6.9,sqft:962,title:'Premium Renovation | Vacant | Marina View',agency:'AQUA Properties'},
+  {id:'14561195',area:'Jumeirah Beach Residence',type:'Apartment',beds:3,ask:9300000,was:9980000,drop:-6.8,sqft:1868,title:'Panoramic Sea Views | Turn-Key Fully Furnished',agency:'Nova Star Real Estate'},
+  {id:'14189998',area:'Business Bay',            type:'Townhouse',beds:4,ask:5500000,was:5900000,drop:-6.8,sqft:3920,title:'Spacious 4BR TH | Premium Facilities | Prime Location',agency:'Mirage Capital'},
+  {id:'14327440',area:'Dubai Marina',            type:'Apartment',beds:2,ask:2300000,was:2450000,drop:-6.1,sqft:1494,title:'Investor Deal | Largest Layout | Vacant | Marina View',agency:'Betterhomes'},
+  {id:'14415109',area:'Downtown Dubai',          type:'Apartment',beds:1,ask:2300000,was:2450000,drop:-6.1,sqft:714,title:'Vacant | Exclusive | Burj Khalifa View',agency:'Houstetic Properties'},
+  {id:'12575288',area:'Dubai Marina',            type:'Apartment',beds:2,ask:2350000,was:2500000,drop:-6.0,sqft:1677,title:'Spacious 1,677 Sq Ft | Partial Marina View | Vacant',agency:'Betterhomes'},
+  {id:'13972505',area:'Jumeirah Village Circle', type:'Apartment',beds:1,ask:1400000,was:1490000,drop:-6.0,sqft:798,title:'Best View | Luxury Furnished | Best Layout',agency:'First Horizon'},
+  {id:'12947968',area:'Dubai Hills Estate',      type:'Apartment',beds:2,ask:2500000,was:2650000,drop:-5.7,sqft:1021,title:'Brand New and Fully Upgraded Kitchen | Furnished',agency:'Driven Properties'},
+  {id:'14432597',area:'Dubai Hills Estate',      type:'Apartment',beds:2,ask:1750000,was:1850000,drop:-5.4,sqft:744,title:'Exclusive | Vacant | Motivated Seller | Prime Location',agency:'Gia & Co'},
+  {id:'14462379',area:'Downtown Dubai',          type:'Apartment',beds:1,ask:7400000,was:7800000,drop:-5.1,sqft:1182,title:'Full Fountain View | Luxurious | Vacant | Big Size',agency:'D AND B Properties'},
+  {id:'14467085',area:'Dubai Marina',            type:'Apartment',beds:1,ask:1900000,was:2000000,drop:-5.0,sqft:880,title:'Emirates Golf Course View | Prime Location',agency:'fäm Properties'},
+  // Saadiyat Island (Abu Dhabi but tracked by PanicSelling)
+  {id:'11163425',area:'Jumeirah Beach Residence',type:'Apartment',beds:0,ask:1100000,was:1200000,drop:-8.3,sqft:408,title:'Convenient Locale | Relaxing Living | Balcony',agency:'Advisors Properties'},
+];
+
+/* ══════════════════════ STATE ═══════════════════════════════════════════════ */
+let L        = [];   // enriched listings
+let PORT     = [];   // portfolio (listing ids)
+let _key     = sessionStorage.getItem('gpi_k') || '';
+let _openId  = null;
+let _irrId   = null;
+let _sortCol = 'score';
+let _sortDir = -1;
+let _gradeFilter = '';
+
+/* ══════════════════════ KEY ════════════════════════════════════════════════ */
+function toggleKey(){const r=document.getElementById('key-row');r.style.display=r.style.display==='none'?'flex':'none';if(r.style.display==='flex')document.getElementById('key-in').focus();}
+function saveKey(){const v=document.getElementById('key-in').value.trim();if(!v.startsWith('sk-ant-')){alert('Enter a valid Anthropic API key');return;}_key=v;sessionStorage.setItem('gpi_k',v);document.getElementById('key-row').style.display='none';document.getElementById('key-btn').style.display='none';document.getElementById('key-ok').style.display='flex';}
+function clearKey(){_key='';sessionStorage.removeItem('gpi_k');document.getElementById('key-ok').style.display='none';document.getElementById('key-btn').style.display='';}
+function claude(body){return fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':_key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify(body)});}
+if(_key){document.addEventListener('DOMContentLoaded',()=>{document.getElementById('key-btn').style.display='none';document.getElementById('key-ok').style.display='flex';});}
+
+/* ══════════════════════ HELPERS ════════════════════════════════════════════ */
+const f$  = n=>!n?'—':n>=1e6?`AED ${(n/1e6).toFixed(2)}M`:`AED ${Math.round(n/1000)}K`;
+const f$s = n=>!n?'—':n>=1e6?`${(n/1e6).toFixed(2)}M`:`${Math.round(n/1000)}K`;
+const pc  = n=>n!=null?n.toFixed(1)+'%':'—';
+const bl  = b=>b===0?'Studio':b?b+'BR':'—';
+const now = ()=>new Date().toISOString();
+
+function getYield(area, type, beds) {
+  const base = YIELDS[area]?.[type]?.[beds]
+    || YIELDS[area]?.[type]?.[1]
+    || (type==='Villa'?.050:type==='Townhouse'?.060:.055);
+  return base * (MARKET_PARAMS[CURRENT_MARKET]?.rentHaircut || 1.0);
+}
+function getDLDPrice(area,type,beds){return FALLBACK_PRICE[area]?.[type]?.[beds]||FALLBACK_PRICE[area]?.[type]?.[1]||null;}
+
+/* ══════════════════════ IRR CALCULATOR ════════════════════════════════════ */
+function calcIRR(cashflows, guess=0.1, maxIter=200, tol=1e-7){
+  let r=guess;
+  for(let i=0;i<maxIter;i++){
+    let npv=0,dnpv=0;
+    for(let t=0;t<cashflows.length;t++){
+      npv  += cashflows[t]/Math.pow(1+r,t);
+      dnpv -= t*cashflows[t]/Math.pow(1+r,t+1);
+    }
+    if(Math.abs(dnpv)<1e-12) break;
+    const rNew=r-npv/dnpv;
+    if(Math.abs(rNew-r)<tol) return rNew;
+    r=rNew;
+  }
+  return r;
+}
+
+function buildCashflows(ask, yield_, capAppreciation3yr){
+  const vacancy = MARKET_PARAMS[CURRENT_MARKET]?.vacancy || 0.08;
+  const entry   = ask * (1 + DLD_FEE);
+  const annNOI  = ask * yield_ * (1 - vacancy) * (1 - OPEX);
+  const exitVal = ask * (1 + capAppreciation3yr);
+  return [-entry, annNOI, annNOI, annNOI + exitVal];
+}
+
+function calcScenarios(ask, yield_){
+  const cfBear = buildCashflows(ask, yield_, -0.05);
+  const cfBase = buildCashflows(ask, yield_,  0.05);
+  const cfBull = buildCashflows(ask, yield_,  0.20);
+  const irr = cf => Math.max(-1, Math.min(5, calcIRR(cf)));
+  const em  = cf => (cf.slice(1).reduce((s,v)=>s+v,0) - Math.abs(cf[0])) / Math.abs(cf[0]) + 1;
+  return {
+    bear: { irr: irr(cfBear)*100, em: em(cfBear), capApp: -5 },
+    base: { irr: irr(cfBase)*100, em: em(cfBase), capApp:  5 },
+    bull: { irr: irr(cfBull)*100, em: em(cfBull), capApp: 20 },
+  };
+}
+
+/* ══════════════════════ SCORING ENGINE ════════════════════════════════════ */
+function scoreAndGrade(listing){
+  const {ask, type, beds, area, drop, dldP_override} = listing;
+  const dldP   = dldP_override || getDLDPrice(area, type, beds);
+  const yield_ = getYield(area, type, beds);
+  const intel  = AREA_INTEL[area] || {supply:3,demand:6,liquidity:2};
+
+  // 1. Discount to DLD NAV (30 pts max = 3.0)
+  let navScore = 1.0;
+  let discountToNAV = null;
+  if(dldP){
+    discountToNAV = +((dldP - ask) / dldP * 100).toFixed(1);
+    if(discountToNAV >= 20)       navScore = 3.0;
+    else if(discountToNAV >= 15)  navScore = 2.5;
+    else if(discountToNAV >= 10)  navScore = 2.0;
+    else if(discountToNAV >= 5)   navScore = 1.5;
+    else if(discountToNAV >= 0)   navScore = 1.0;
+    else if(discountToNAV >= -10) navScore = 0.5;
+    else                          navScore = 0.0;
+  }
+
+  // 2. Yield vs hurdle (25 pts max = 2.5) — using market-adjusted yield
+  const yldPct = yield_ * 100;
+  let yldScore = 0;
+  if(yldPct >= 9)            yldScore = 2.5;
+  else if(yldPct >= 8)       yldScore = 2.0;
+  else if(yldPct >= 7)       yldScore = 1.75;
+  else if(yldPct >= HURDLE)  yldScore = 1.5;
+  else if(yldPct >= 6)       yldScore = 1.0;
+  else if(yldPct >= 5)       yldScore = 0.5;
+  else                       yldScore = 0.25;
+
+  // 3. Distress / seller motivation (20 pts max = 2.0)
+  let distScore = 0;
+  if(drop <= -20)       distScore = 2.0;
+  else if(drop <= -15)  distScore = 1.75;
+  else if(drop <= -10)  distScore = 1.25;
+  else if(drop <= -7)   distScore = 0.75;
+  else if(drop <= -5)   distScore = 0.5;
+  else                  distScore = 0.25;
+
+  // 4. Area quality / exit liquidity (15 pts max = 1.5)
+  const areaScore = Math.min(1.5, (intel.demand/10*1.0 + intel.liquidity/3*0.5));
+
+  // 5. Supply / demand balance (10 pts max = 1.0)
+  const supplyScore = intel.supply===1?1.0:intel.supply===2?0.75:intel.supply===3?0.4:intel.supply===4?0.2:0.0;
+
+  const raw   = navScore + yldScore + distScore + areaScore + supplyScore;
+  const score = Math.min(10, Math.max(1, Math.round(raw * 10) / 10));
+
+  // ── HARD GATE: IRR must clear hurdle in BASE case to get BUY or STRONG BUY ──
+  // Calculate base IRR for gate check
+  const vacancy = MARKET_PARAMS[CURRENT_MARKET]?.vacancy || 0.08;
+  const noi     = ask * yield_ * (1 - vacancy) * (1 - OPEX);
+  const cfBase  = [-(ask*(1+DLD_FEE)), noi, noi, noi + ask*1.05];
+  const baseIRR = calcIRR(cfBase) * 100;
+  const clearsHurdle = baseIRR >= HURDLE;
+
+  // Grade logic: score gives the tier, but income gate constrains it
+  let grade;
+  if(score >= 8 && clearsHurdle)       grade = 'STRONG BUY';
+  else if(score >= 8 && !clearsHurdle) grade = 'BUY';        // Strong asset but income-light — note in analysis
+  else if(score >= 6 && clearsHurdle)  grade = 'BUY';
+  else if(score >= 6 && !clearsHurdle) grade = 'WATCH';      // Cap appreciation play only
+  else if(score >= 4)                  grade = 'WATCH';
+  else                                 grade = 'PASS';
+
+  // Flag for display: does deal clear hurdle? Is it income or appreciation play?
+  const irrFlag  = clearsHurdle ? null : 'INCOME SHORTFALL';
+  const playType = clearsHurdle ? (yldPct >= HURDLE ? 'INCOME + GROWTH' : 'GROWTH + INCOME') : 'CAPITAL APPRECIATION';
+
+  return { score, grade, discountToNAV, navScore, yldScore, distScore, areaScore, supplyScore, clearsHurdle, irrFlag, playType, baseIRR };
+}
+
+/* ══════════════════════ ENRICHMENT ════════════════════════════════════════ */
+function enrich(s){
+  const beds      = s.beds ?? 0;
+  const yield_    = getYield(s.area, s.type, beds);
+  // DLD NAV: PSF × sqft if sqft available, else fallback
+  const navResult = calcDLDNAV(s.area, s.type, beds, s.sqft);
+  const dldP      = navResult.nav;
+  const navConf   = navResult.confidence;
+  const navMethod = navResult.method;
+  // Market-adjusted NOI
+  const vacancy   = MARKET_PARAMS[CURRENT_MARKET]?.vacancy || 0.08;
+  const grossYield = yield_ * 100;
+  const noi       = s.ask * yield_ * (1 - vacancy) * (1 - OPEX);
+  const capRate   = noi / s.ask * 100;
+  const yieldSprd = grossYield - HURDLE;
+  const saved     = s.was - s.ask;
+  const psf       = s.sqft ? Math.round(s.ask / s.sqft) : null;
+  const dldSqft   = DLD_SQFT[s.area] || null;
+  const psfSprd   = (psf && dldSqft) ? psf - dldSqft : null;
+  const scenarios = calcScenarios(s.ask, yield_);
+  const {score, grade, discountToNAV, ...scoreDetail} = scoreAndGrade({...s, beds, dldP_override: dldP});
+
+  const status = s.drop <= -15 ? 'Highly Distressed'
+    : s.drop <= -10 ? 'Distressed'
+    : s.drop <= -5  ? 'Watch'
+    : 'New Drop';
+
+  // Bid target — DLD NAV anchored
+  let bid;
+  if(dldP){
+    const vs = (s.ask - dldP) / dldP;
+    if(vs < -.15)    bid = Math.round(s.ask * .97 / 100000) * 100000;
+    else if(vs < 0)  bid = Math.round(Math.min(s.ask * .93, dldP * .95) / 100000) * 100000;
+    else if(vs < .10)bid = Math.round(Math.min(s.ask * .90, dldP * .95) / 100000) * 100000;
+    else             bid = Math.round(Math.min(s.ask * .87, dldP * .93) / 100000) * 100000;
+  } else {
+    bid = Math.round(s.ask * .88 / 100000) * 100000;
+  }
+
+  return {
+    ...s, beds, yield_,grossYield,noi,capRate,yieldSprd,saved,psf,dldSqft,psfSprd,
+    dldP,discountToNAV,scenarios,score,grade,status,bid,
+    navConf, navMethod, vacancy,
+    marketMode: CURRENT_MARKET,
+    // Data transparency
+    dropSource: 'Seller reduced own Bayut asking price (not DLD transaction)',
+    dataDate:   '21 Mar 2026',
+    ...scoreDetail,
+    portalUrl:`https://www.bayut.com/property/details-${s.id}.html`,
+    _id: 'l_'+s.id,
+  };
+}
+
+/* ══════════════════════ LOAD SCREEN ════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   LIVE DATA PARSER — PanicSelling via allorigins CORS proxy
+   Zero setup. Zero cost. Works in any browser.
+   allorigins.win proxies the request, returns JSON-wrapped HTML.
+   Drops encoded as &#8595; (HTML entity for ↓)
+═══════════════════════════════════════════════════════════ */
+async function fetchLiveDrops() {
+  const PROXY = 'https://api.allorigins.win/get?url=';
+  const TARGET = encodeURIComponent('https://panicselling.com/list/');
+  const url = PROXY + TARGET;
+
+  log('Fetching live data via allorigins proxy…', 'hi');
+  const resp = await fetch(url, { signal: AbortSignal.timeout(20000) });
+  if (!resp.ok) throw new Error(`Proxy returned ${resp.status}`);
+  const data = await resp.json();
+  const html  = data.contents || '';
+  if (html.length < 5000) throw new Error('Response too short — proxy may be unavailable');
+
+  // Parse the table — same structure as panicselling.com/list/
+  const tableMatch = html.match(/<table[^>]*>([\s\S]*?)<\/table>/);
+  if (!tableMatch) throw new Error('No table found in response');
+
+  const rows = [...tableMatch[1].matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/g)].slice(1); // skip header
+
+  function stripTags(s) {
+    return s.replace(/<[^>]+>/g, '').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').replace(/&#\d+;/g,'').trim();
+  }
+  function parseAED(s) {
+    s = s.replace(/AED|,|\s/g,'');
+    if (s.includes('M')) return Math.round(parseFloat(s)*1_000_000);
+    if (s.includes('K')) return Math.round(parseFloat(s)*1_000);
+    return parseInt(s)||0;
+  }
+
+  const listings = [];
+  for (const row of rows) {
+    const tds = [...row[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map(m=>m[1]);
+    if (tds.length < 8) continue;
+
+    // TD0: drop badge — &#8595;26.7% or ↓26.7%
+    const dropM = tds[0].match(/(?:&#8595;|↓)([\d.]+)%/);
+    if (!dropM) continue;
+    const drop = -parseFloat(dropM[1]);
+
+    // TD1: title + listing ID
+    const idM    = tds[1].match(/for-sale_(\d+)/);
+    const titleM = tds[1].match(/<a[^>]*>([\s\S]*?)<\/a>/);
+    const title  = titleM ? stripTags(titleM[1]) : '';
+    const lid    = idM ? idM[1] : null;
+    if (!lid) continue;
+
+    const meta   = stripTags(tds[1]).replace(title,'').trim();
+    const bedsM  = meta.match(/(\d+)BR/);
+    const beds   = /Studio/i.test(meta) ? 0 : (bedsM ? parseInt(bedsM[1]) : 1);
+    const rt     = (meta+title).toLowerCase();
+    const type   = rt.includes('villa') ? 'Villa' : rt.includes('townhouse') ? 'Townhouse' : 'Apartment';
+
+    // TD2: area
+    let area = stripTags(tds[2])
+      .replace(/\(JBR\)|\(JVC\)|\(JLT\)/g,'').trim();
+    // Normalize common variations
+    const AREA_MAP = {
+      'Jumeirah Beach Residence': 'Jumeirah Beach Residence',
+      'Jumeirah Village Circle':  'Jumeirah Village Circle',
+      'Jumeirah Lake Towers':     'Jumeirah Lake Towers',
+      'Al Reem Island':           'Al Reem Island',
+      'Yas Island':               'Yas Island',
+      'Saadiyat Island':          'Saadiyat Island',
+    };
+    for (const [k,v] of Object.entries(AREA_MAP)) {
+      if (area.toLowerCase().includes(k.toLowerCase())) { area = v; break; }
+    }
+
+    // TD3: ask · TD4: was
+    const ask  = parseAED(stripTags(tds[3]));
+    let   was  = parseAED(stripTags(tds[4]));
+    if (was === 0) was = Math.round(ask / (1 + Math.abs(drop)/100));
+
+    // TD5: sqft
+    const sqftS = stripTags(tds[5]).replace(/,/g,'');
+    const sqft  = /^\d+$/.test(sqftS) ? parseInt(sqftS) : null;
+
+    // TD7: agency
+    const agency = stripTags(tds[7]);
+
+    if (ask < 50000) continue;
+    listings.push({ id:lid, area, type, beds, ask, was, drop, sqft, title:title.slice(0,100), agency:agency.slice(0,30) });
+  }
+
+  log(`✓ Parsed ${listings.length} live listings from PanicSelling.com`, 'ok');
+  return listings;
+}
+
+/* ══════════════════════ LOAD SCREEN ════════════════════════════════════════ */
+async function loadScreen(){
+  const btn = document.getElementById('btn-load');
+  btn.disabled = true; btn.innerHTML = '<span class="spi"></span>Screening…';
+  setStatus('Fetching live data…');
+  L = [];
+  let source = '';
+
+  // ── TIER 1: Your GitHub scraper data — all areas, all drops ──────────────
+  // Once the GitHub Actions scraper has run twice, this is the primary source.
+  // It reads drops.json directly from your GitHub repo via the raw CDN.
+  // Replace YOUR_GITHUB_USERNAME and YOUR_REPO_NAME with your actual values.
+  // Example: if your repo is github.com/johnsmith/dxb-screen
+  //   → GITHUB_USER = 'johnsmith'
+  //   → GITHUB_REPO = 'dxb-screen'
+  const GITHUB_USER = document.getElementById('gh-user')?.value?.trim() || localStorage.getItem('gh_user') || '';
+  const GITHUB_REPO = document.getElementById('gh-repo')?.value?.trim() || localStorage.getItem('gh_repo') || '';
+
+  if (GITHUB_USER && GITHUB_REPO) {
+    try {
+      setStatus('Fetching from GitHub scraper…');
+      log(`Fetching drops.json from github.com/${GITHUB_USER}/${GITHUB_REPO}…`, 'hi');
+      // GitHub raw content CDN — no auth, no CORS issues, always works
+      const ghUrl = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/data/drops.json?t=${Date.now()}`;
+      const resp  = await fetch(ghUrl, { signal: AbortSignal.timeout(12000) });
+      if (!resp.ok) throw new Error(`GitHub returned ${resp.status} — has the scraper run yet?`);
+      const drops = await resp.json();
+      if (Array.isArray(drops) && drops.length > 0) {
+        // Convert scraper format → screen format
+        L = drops.map(d => enrich({
+          id:     d.listing_id,
+          area:   d.area,
+          type:   d.type   || 'Apartment',
+          beds:   d.beds   ?? 0,
+          ask:    d.current_price,
+          was:    d.first_price  || d.previous_price || d.current_price,
+          drop:   d.drop_from_first || d.drop_from_prev || 0,
+          sqft:   d.sqft   || null,
+          title:  d.title  || '',
+          agency: d.agency || '',
+        })).filter(l => l.ask > 0);
+
+        // Also fetch stats for last-run timestamp
+        try {
+          const statsResp = await fetch(`https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/data/stats.json?t=${Date.now()}`);
+          const stats = await statsResp.json();
+          const lastRun = stats.runAt ? new Date(stats.runAt).toLocaleString('en-GB') : 'unknown';
+          source = `GitHub scraper · ${GITHUB_USER}/${GITHUB_REPO} · ${L.length} listings · Last run: ${lastRun}`;
+        } catch(e) {
+          source = `GitHub scraper · ${GITHUB_USER}/${GITHUB_REPO} · ${L.length} listings`;
+        }
+        log(`✓ Tier 1 (GitHub): ${L.length} listings across all Dubai areas`, 'ok');
+      } else if (Array.isArray(drops) && drops.length === 0) {
+        log('GitHub drops.json is empty — scraper needs to run twice to detect drops', 'warn');
+        setStatus('GitHub has no drops yet — scraper needs 2 runs');
+      }
+    } catch(e) {
+      log(`Tier 1 (GitHub) failed: ${e.message}`, 'warn');
+      setStatus('GitHub unavailable — trying live fetch…');
+    }
+  }
+
+  // ── TIER 2: allorigins proxy → PanicSelling live (~30 listings) ──────────
+  if (!L.length) {
+    try {
+      setStatus('Fetching live from PanicSelling.com…');
+      const raw = await fetchLiveDrops();
+      if (raw.length > 5) {
+        L = raw.map(s => enrich(s));
+        source = `Live · PanicSelling.com · ${new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})} · ~30 listings (set up GitHub scraper for full coverage)`;
+        log(`✓ Tier 2 (allorigins): ${L.length} live listings`, 'ok');
+      }
+    } catch(e) {
+      log(`Tier 2 (allorigins) failed: ${e.message}`, 'warn');
+      setStatus('Proxy unavailable — trying API…');
+    }
+  }
+
+  // ── TIER 3: Anthropic API with web_search (if key set) ───────────────────
+  if (!L.length && _key) {
+    try {
+      setStatus('Fetching via Anthropic API…');
+      log('Trying Anthropic API web_search fallback…');
+      const r = await claude({
+        model: 'claude-sonnet-4-20250514', max_tokens: 4000,
+        tools: [{type:'web_search_20250305',name:'web_search'}],
+        system: `Fetch https://panicselling.com/list/ and extract ALL property listings from the HTML table.
+For each row return: area (Dubai area), type (Apartment/Villa/Townhouse), beds (0=Studio), ask (AED number), was (AED number), drop (negative float like -12.5), listingId (digits from URL), sqft (number or null), title.
+Pure JSON only, no markdown: {"listings":[...]}`,
+        messages: [{ role:'user', content:'Fetch panicselling.com/list/ — extract all Dubai property price drop listings as JSON.' }]
+      });
+      const data = await r.json();
+      const tb   = data.content?.find(b => b.type==='text');
+      if (tb?.text) {
+        const m = tb.text.replace(/```json|```/g,'').trim().match(/\{[\s\S]*\}/);
+        if (m) {
+          const p = JSON.parse(m[0]);
+          if (p.listings?.length > 5) {
+            L = p.listings.filter(l => l.listingId && l.ask > 0).map(l => enrich({
+              id: l.listingId, area: l.area||'Dubai', type: l.type||'Apartment',
+              beds: l.beds??0, ask: l.ask,
+              was: l.was||Math.round(l.ask/(1+Math.abs(l.drop||5)/100)),
+              drop: l.drop||-5, sqft: l.sqft||null, title: l.title||'', agency:'',
+            }));
+            source = `Live · PanicSelling.com via Anthropic API · ${new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}`;
+            log(`✓ Tier 3 (API): ${L.length} listings`, 'ok');
+          }
+        }
+      }
+    } catch(e) { log(`Tier 3 (API) failed: ${e.message}`, 'warn'); }
+  }
+
+  // ── TIER 4: Verified seed data (always available, 28 real listings) ───────
+  if (!L.length) {
+    log('Using verified seed data (21 Mar 2026 snapshot)', 'warn');
+    L = SEEDS.map(s => enrich(s));
+    source = 'Seed data · 21 Mar 2026 snapshot · Set up GitHub scraper for live data';
+    setStatus('');
+  }
+
+  // Sort by score descending
+  L.sort((a,b) => b.score - a.score);
+
+  // Update UI
+  document.getElementById('empty').style.display      = 'none';
+  document.getElementById('tbl-sec').style.display    = 'block';
+  document.getElementById('ctrl').style.display       = 'flex';
+  document.getElementById('grade-row').style.display  = 'flex';
+  document.getElementById('data-strip').style.display = 'block';
+  const mp = MARKET_PARAMS[CURRENT_MARKET];
+  document.getElementById('mkt-note').textContent     = `Market: ${mp.label} — vacancy ${(mp.vacancy*100).toFixed(0)}%, rent haircut ${((1-mp.rentHaircut)*100).toFixed(0)}% — ${mp.note}`;
+  document.getElementById('c-dt').textContent         = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'}).toUpperCase();
+  document.getElementById('c-ct').textContent         = L.length + ' deals screened';
+
+  // Update source note in data strip
+  const src = document.getElementById('src-label');
+  if (src) src.textContent = source;
+
+  populateFilters();
+  updateKPIs();
+  render();
+  renderMatrix();
+  renderIRRList();
+  renderAreaIntel();
+  renderPortPicker();
+  buildTicker();
+  buildThead();
+
+  btn.disabled = false;
+  btn.textContent = '▶ Refresh Screen';
+  setStatus('');
+  log(`Screen loaded: ${L.length} deals, ${L.filter(l=>l.grade==='STRONG BUY').length} strong buys`, 'ok');
+}
+
+function setStatus(msg) {
+  const el = document.getElementById('p-status');
+  if (!el) return;
+  el.textContent = msg || '';
+  el.style.display = msg ? 'inline-flex' : 'none';
+}
+
+/* ══════════════════════ LOG ════════════════════════════════════════════════ */
+function log(msg, type='info') {
+  const ts  = new Date().toLocaleTimeString('en-GB',{hour12:false});
+  const col = type==='ok'?'var(--teal2)':type==='hi'?'var(--amber)':type==='warn'?'var(--red2)':'var(--dim)';
+  console.log(`%c[${ts}] ${msg}`, `color:${col==='var(--teal2)'?'#38b488':col==='var(--amber)'?'#f0a500':col==='var(--red2)'?'#ff6060':'#6a8090'}`);
+}
+
+/* ══════════════════════ KPIs ═══════════════════════════════════════════════ */
+function updateKPIs(){
+  const sb=L.filter(l=>l.grade==='STRONG BUY').length;
+  const b =L.filter(l=>l.grade==='BUY').length;
+  const w =L.filter(l=>l.grade==='WATCH').length;
+  const p =L.filter(l=>l.grade==='PASS').length;
+  const avgY=L.length?L.reduce((s,l)=>s+l.grossYield,0)/L.length:0;
+  const avgIRR=L.length?L.reduce((s,l)=>s+l.scenarios.base.irr,0)/L.length:0;
+  const totalCap=L.reduce((s,l)=>s+l.ask,0);
+  const avgNav=L.filter(l=>l.discountToNAV!=null);
+  const avgDisc=avgNav.length?avgNav.reduce((s,l)=>s+l.discountToNAV,0)/avgNav.length:0;
+  document.getElementById('k-sb').textContent=sb;
+  document.getElementById('k-b').textContent=b;
+  document.getElementById('k-w').textContent=w;
+  document.getElementById('k-p').textContent=p;
+  document.getElementById('k-y').textContent=avgY.toFixed(1)+'%';
+  document.getElementById('k-irr').textContent=avgIRR.toFixed(1)+'%';
+  document.getElementById('k-cap').textContent=f$s(totalCap);
+  document.getElementById('k-nav').textContent=avgDisc.toFixed(1)+'%';
+  document.getElementById('gc-sb').textContent=sb;
+  document.getElementById('gc-b').textContent=b;
+  document.getElementById('gc-w').textContent=w;
+  document.getElementById('gc-p').textContent=p;
+  document.getElementById('gc-all').textContent=L.length;
+}
+
+function filterGrade(g){_gradeFilter=g;document.getElementById('fg').value=g;render();}
+
+function populateFilters(){
+  const areas=[...new Set(L.map(l=>l.area))].sort();
+  const fa=document.getElementById('fa');while(fa.options.length>1)fa.remove(1);
+  areas.forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;fa.appendChild(o);});
+  const fg=document.getElementById('fg');while(fg.options.length>1)fg.remove(1);
+  ['STRONG BUY','BUY','WATCH','PASS'].forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;fg.appendChild(o);});
+  const pa=document.getElementById('pa-fa');while(pa.options.length>1)pa.remove(1);
+  areas.forEach(a=>{const o=document.createElement('option');o.value=a;o.textContent=a;pa.appendChild(o);});
+  const pg=document.getElementById('pa-fg');while(pg.options.length>1)pg.remove(1);
+  ['STRONG BUY','BUY','WATCH','PASS'].forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;pg.appendChild(o);});
+}
+
+/* ══════════════════════ TICKER ════════════════════════════════════════════ */
+function buildTicker(){
+  if(!L.length)return;
+  const items=L.slice(0,15).map(l=>`<span class="ti">${l.area.toUpperCase()} · ${bl(l.beds)} ${l.type} · <span class="ta">${l.grade}</span> · <span class="tt">${pc(l.grossYield)} yield</span> · IRR <span class="tt">${pc(l.scenarios.base.irr)}</span> · <span class="tr">${l.drop}% drop</span></span>`);
+  document.getElementById('tk').innerHTML=[...items,...items].join('');
+}
+
+/* ══════════════════════ TABLE ══════════════════════════════════════════════ */
+function buildThead(){
+  const cols=[
+    {k:'grade',l:'Grade'},
+    {k:'score',l:'Score'},
+    {k:'area', l:'Area'},
+    {k:'title',l:'Deal'},
+    {k:'type', l:'Type/Beds'},
+    {k:'ask',  l:'Ask Price'},
+    {k:'dldP', l:'DLD NAV'},
+    {k:'discountToNAV',l:'Disc to NAV'},
+    {k:'grossYield',l:'Gross Yield'},
+    {k:'yieldSprd',l:'Yield Spread'},
+    {k:'scenarios.base.irr',l:'Base IRR'},
+    {k:'scenarios.bull.irr',l:'Bull IRR'},
+    {k:'scenarios.base.em',l:'Eq Multiple'},
+    {k:'capRate',l:'Cap Rate'},
+    {k:'drop',l:'Price Drop'},
+    {k:'saved',l:'AED Saved'},
+    {k:'psf',l:'PSF'},
+    {k:'',l:'Links'},
+    {k:'',l:'Add'},
+  ];
+  document.getElementById('thead').innerHTML=cols.map(c=>
+    `<th ${c.k?`onclick="sortBy('${c.k}')" `:''}class="${_sortCol===c.k?'sorted':''}">${c.l}${c.k?`<span class="sa">${_sortCol===c.k?(_sortDir>0?'↑':'↓'):'↕'}</span>`:''}</th>`
+  ).join('');
+}
+
+const GC={
+  'STRONG BUY':{bg:'rgba(0,168,120,.1)',br:'rgba(0,168,120,.3)',tx:'#00d49a'},
+  'BUY':       {bg:'rgba(64,128,224,.1)',br:'rgba(64,128,224,.3)',tx:'#60a0ff'},
+  'WATCH':     {bg:'rgba(240,165,0,.1)', br:'rgba(240,165,0,.3)', tx:'#f0a500'},
+  'PASS':      {bg:'rgba(212,64,64,.1)', br:'rgba(212,64,64,.3)', tx:'#ff6060'},
+};
+
+function sortBy(k){
+  if(_sortCol===k)_sortDir*=-1; else{_sortCol=k;_sortDir=-1;}
+  buildThead(); render();
+}
+
+function getVal(l,k){
+  if(k==='scenarios.base.irr') return l.scenarios.base.irr;
+  if(k==='scenarios.bull.irr') return l.scenarios.bull.irr;
+  if(k==='scenarios.base.em')  return l.scenarios.base.em;
+  if(k==='title') return l.title||'';
+  if(k==='area')  return l.area||'';
+  return l[k]??0;
+}
+
+function getFiltered(){
+  const q  =(document.getElementById('fq')?.value||'').toLowerCase();
+  const fg = document.getElementById('fg')?.value||'';
+  const fa = document.getElementById('fa')?.value||'';
+  const ft = document.getElementById('ft')?.value||'';
+  const fb = document.getElementById('fb')?.value;
+  const fym= parseFloat(document.getElementById('fym')?.value||'0');
+  const fir= parseFloat(document.getElementById('fir')?.value||'0');
+  const fso= document.getElementById('fso')?.value||'score';
+  return [...L].filter(l=>{
+    if(fg&&l.grade!==fg)return false;
+    if(_gradeFilter&&l.grade!==_gradeFilter)return false;
+    if(fa&&l.area!==fa)return false;
+    if(ft&&l.type!==ft)return false;
+    if(fb!==''&&fb!==undefined&&l.beds!=parseInt(fb))return false;
+    if(fym>0&&l.grossYield<fym)return false;
+    if(fir>0&&l.scenarios.base.irr<fir)return false;
+    if(q&&!(l.area||'').toLowerCase().includes(q)&&!(l.title||'').toLowerCase().includes(q))return false;
+    return true;
+  }).sort((a,b)=>{
+    const ka={score:'score',irr_base:'scenarios.base.irr',yield:'grossYield',discount:'discountToNAV',drop:'drop',saved:'saved',price_asc:'ask'}[fso]||_sortCol;
+    const va=getVal(a,ka)||(fso==='price_asc'?0:fso==='drop'?0:-999);
+    const vb=getVal(b,ka)||(fso==='price_asc'?0:fso==='drop'?0:-999);
+    if(typeof va==='string') return _sortDir*(va.localeCompare(vb));
+    if(fso==='price_asc') return va-vb;
+    if(fso==='drop') return va-vb;
+    return _sortDir*(vb-va);
+  });
+}
+
+function render(){
+  if(!L.length)return;
+  const rows=getFiltered();
+  document.getElementById('fct').innerHTML=`<span style="color:var(--amber)">${rows.length}</span> / ${L.length}`;
+  const tbody=document.getElementById('tbody');
+  if(!rows.length){
+    tbody.innerHTML=`<tr><td colspan="19" style="padding:40px;text-align:center;color:var(--dim);font-family:var(--pmono)">No deals match current filters</td></tr>`;
+    return;
+  }
+  tbody.innerHTML=rows.map((l,i)=>rowHTML(l,i)).join('');
+}
+
+function rowHTML(l,i){
+  const gc=GC[l.grade]||GC['PASS'];
+  const scC=l.score>=8?'var(--teal2)':l.score>=6?'var(--blue2)':l.score>=4?'var(--amber)':'var(--red)';
+  const dC=l.drop<=-15?'var(--red2)':l.drop<=-10?'var(--amber)':l.drop<=-5?'#e0c040':'var(--teal2)';
+  const discC=!l.discountToNAV?'var(--muted)':l.discountToNAV>10?'var(--teal2)':l.discountToNAV>0?'#a0c870':l.discountToNAV>-10?'var(--amber)':'var(--red2)';
+  const irrC=l.scenarios.base.irr>=HURDLE?'var(--teal2)':l.scenarios.base.irr>=5?'var(--amber)':'var(--red2)';
+  const ysC=l.yieldSprd>=1.5?'var(--teal2)':l.yieldSprd>=0?'#a0c870':'var(--red2)';
+  const inPort=PORT.includes(l._id);
+  const navDot=l.navConf==='HIGH'?'<span style="font-size:7px;color:var(--teal2);margin-left:2px" title="DLD NAV: '+l.navMethod+' — HIGH confidence">●</span>':l.navConf==='MEDIUM'?'<span style="font-size:7px;color:var(--amber);margin-left:2px" title="DLD NAV: '+l.navMethod+' — MEDIUM confidence">●</span>':'';
+  return`<tr onclick="openModal('${l._id}')" class="rise" style="animation-delay:${i*.008}s">
+    <td>
+      <span class="badge" style="background:${gc.bg};border-color:${gc.br};color:${gc.tx}">${l.grade}</span>
+      ${l.irrFlag?`<div style="font-size:6.5px;color:var(--amber);font-family:var(--pmono);margin-top:2px;letter-spacing:.04em">⚠ ${l.irrFlag}</div>`:''}
+    </td>
+    <td><span class="ring" style="color:${scC};border-color:${scC}">${l.score}</span></td>
+    <td style="color:var(--cream);font-weight:500;white-space:nowrap">${l.area}</td>
+    <td style="color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${l.title||''}">${l.title||'—'}</td>
+    <td style="white-space:nowrap">
+      <span style="color:var(--muted)">${l.type} · ${bl(l.beds)}</span>
+      <div style="font-size:7px;color:var(--dim);font-family:var(--pmono)">${l.playType||''}</div>
+    </td>
+    <td style="font-weight:600;color:var(--cream);white-space:nowrap">${f$(l.ask)}</td>
+    <td style="color:var(--muted)">${l.dldP?f$(l.dldP):'—'}${navDot}<div style="font-size:7px;color:var(--dim);font-family:var(--pmono)">${l.navMethod||''}</div></td>
+    <td style="text-align:right"><span style="font-weight:700;font-size:12px;color:${discC}">${l.discountToNAV!=null?(l.discountToNAV>0?'+':'')+l.discountToNAV.toFixed(1)+'%':'—'}</span></td>
+    <td style="text-align:right">
+      <span style="color:${l.grossYield>=HURDLE?'var(--teal2)':'var(--amber)'};font-weight:600">${pc(l.grossYield)}</span>
+      <div style="font-size:7px;color:var(--dim);font-family:var(--pmono)">${MARKET_PARAMS[CURRENT_MARKET]?.label||''}</div>
+    </td>
+    <td style="text-align:right"><span style="color:${ysC};font-weight:600">${l.yieldSprd>0?'+':''}${l.yieldSprd.toFixed(2)}%</span></td>
+    <td style="text-align:right">
+      <span style="font-weight:700;color:${irrC}">${pc(l.scenarios.base.irr)}</span>
+      ${!l.clearsHurdle?`<div style="font-size:7px;color:var(--amber);font-family:var(--pmono)">below hurdle</div>`:''}
+    </td>
+    <td style="text-align:right;color:var(--teal2);font-weight:600">${pc(l.scenarios.bull.irr)}</td>
+    <td style="text-align:right;color:var(--muted)">${l.scenarios.base.em.toFixed(2)}×</td>
+    <td style="text-align:right;color:var(--muted)">${pc(l.capRate)}</td>
+    <td>
+      <span style="font-weight:700;font-size:12px;color:${dC}">${l.drop}%</span>
+      <div style="font-size:7px;color:var(--dim);font-family:var(--pmono)">seller cut</div>
+    </td>
+    <td style="color:var(--teal2);font-weight:600;white-space:nowrap">${f$(l.saved)}</td>
+    <td style="text-align:right;color:var(--muted)">${l.psf?l.psf.toLocaleString():'—'}</td>
+    <td onclick="event.stopPropagation()"><a href="${l.portalUrl}" target="_blank" rel="noopener" class="pl" style="background:rgba(240,165,0,.08);border-color:rgba(240,165,0,.3);color:var(--amber)">Bayut ↗</a></td>
+    <td onclick="event.stopPropagation()"><button class="${inPort?'add-btn-small added':'add-btn-small add-green'}" onclick="togglePort('${l._id}')">${inPort?'✓ Added':'+ Add'}</button></td>
+  </tr>`;
+}
+
+/* ══════════════════════ OPPORTUNITY MATRIX ════════════════════════════════ */
+function renderMatrix(){
+  if(!L.length)return;
+  const svg=document.getElementById('matrix-svg');
+  const W=900,H=520,pad={t:40,r:40,b:50,l:70};
+  const pw=W-pad.l-pad.r, ph=H-pad.t-pad.b;
+
+  // Axis ranges
+  const xMin=-20,xMax=30;  // Discount to NAV (%)
+  const yMin=2, yMax=10;   // Gross Yield (%)
+  const hurdleY=HURDLE;
+  const neutralX=0;
+
+  const toX=v=>pad.l+((v-xMin)/(xMax-xMin))*pw;
+  const toY=v=>H-pad.b-((v-yMin)/(yMax-yMin))*ph;
+
+  let s=``;
+
+  // Quadrant backgrounds
+  const hx=toX(neutralX), hy=toY(hurdleY);
+  s+=`<rect x="${pad.l}" y="${pad.t}" width="${hx-pad.l}" height="${hy-pad.t}" fill="rgba(64,128,224,.04)"/>`;
+  s+=`<rect x="${hx}" y="${pad.t}" width="${W-pad.r-hx}" height="${hy-pad.t}" fill="rgba(0,168,120,.05)"/>`;
+  s+=`<rect x="${pad.l}" y="${hy}" width="${hx-pad.l}" height="${H-pad.b-hy}" fill="rgba(212,64,64,.04)"/>`;
+  s+=`<rect x="${hx}" y="${hy}" width="${W-pad.r-hx}" height="${H-pad.b-hy}" fill="rgba(240,165,0,.03)"/>`;
+
+  // Quadrant labels
+  const qStyle=`font-family:'Playfair Display',serif;font-size:13px;fill:var(--amber);opacity:.18;font-style:italic;font-weight:600`;
+  s+=`<text x="${(pad.l+hx)/2}" y="${(pad.t+hy)/2}" text-anchor="middle" style="${qStyle}">VALUE PLAY</text>`;
+  s+=`<text x="${(hx+W-pad.r)/2}" y="${(pad.t+hy)/2}" text-anchor="middle" style="${qStyle}">BEST VALUE</text>`;
+  s+=`<text x="${(pad.l+hx)/2}" y="${(hy+H-pad.b)/2}" text-anchor="middle" style="${qStyle}">AVOID</text>`;
+  s+=`<text x="${(hx+W-pad.r)/2}" y="${(hy+H-pad.b)/2}" text-anchor="middle" style="${qStyle}">INCOME PLAY</text>`;
+
+  // Gridlines
+  for(let x=xMin;x<=xMax;x+=5){
+    const cx=toX(x);
+    s+=`<line x1="${cx}" y1="${pad.t}" x2="${cx}" y2="${H-pad.b}" stroke="rgba(255,255,255,.04)" stroke-width="1"/>`;
+    s+=`<text x="${cx}" y="${H-pad.b+14}" text-anchor="middle" style="font-family:'IBM Plex Mono',monospace;font-size:9px;fill:#3a4858">${x}%</text>`;
+  }
+  for(let y=yMin;y<=yMax;y+=1){
+    const cy=toY(y);
+    s+=`<line x1="${pad.l}" y1="${cy}" x2="${W-pad.r}" y2="${cy}" stroke="rgba(255,255,255,.03)" stroke-width="1"/>`;
+    s+=`<text x="${pad.l-8}" y="${cy+4}" text-anchor="end" style="font-family:'IBM Plex Mono',monospace;font-size:9px;fill:#3a4858">${y}%</text>`;
+  }
+
+  // Hurdle + neutral axis lines
+  s+=`<line x1="${pad.l}" y1="${toY(hurdleY)}" x2="${W-pad.r}" y2="${toY(hurdleY)}" stroke="rgba(240,165,0,.3)" stroke-width="1" stroke-dasharray="4,3"/>`;
+  s+=`<line x1="${toX(0)}" y1="${pad.t}" x2="${toX(0)}" y2="${H-pad.b}" stroke="rgba(240,165,0,.25)" stroke-width="1" stroke-dasharray="4,3"/>`;
+  s+=`<text x="${pad.l-8}" y="${toY(hurdleY)-5}" text-anchor="end" style="font-family:'IBM Plex Mono',monospace;font-size:8px;fill:rgba(240,165,0,.5)">${hurdleY}% hurdle</text>`;
+  s+=`<text x="${toX(0)+4}" y="${pad.t+10}" style="font-family:'IBM Plex Mono',monospace;font-size:8px;fill:rgba(240,165,0,.4)">DLD NAV</text>`;
+
+  // Axis labels
+  s+=`<text x="${W/2}" y="${H}" text-anchor="middle" style="font-family:'IBM Plex Mono',monospace;font-size:10px;fill:#6a7888">← Below DLD NAV · Discount to DLD Comparable (%) · Above DLD NAV →</text>`;
+  s+=`<text x="12" y="${H/2}" transform="rotate(-90,12,${H/2})" text-anchor="middle" style="font-family:'IBM Plex Mono',monospace;font-size:10px;fill:#6a7888">Gross Yield (%)</text>`;
+
+  // Size range for dots
+  const maxSaved=Math.max(...L.map(l=>l.saved),1);
+  const minR=6, maxR=22;
+
+  // Plot deals that have valid coordinates
+  const validL=L.filter(l=>l.discountToNAV!=null);
+  const invalidL=L.filter(l=>l.discountToNAV==null);
+
+  // Dots — invalid (no DLD comp) plotted at x=0 with lower opacity
+  [...validL,...invalidL].forEach((l,idx)=>{
+    const cx=toX(l.discountToNAV!=null?l.discountToNAV:0);
+    const cy=toY(l.grossYield);
+    const r=minR+(l.saved/maxSaved)*(maxR-minR);
+    const gc=GC[l.grade]||GC['PASS'];
+    const col=l.grade==='STRONG BUY'?'#00d49a':l.grade==='BUY'?'#60a0ff':l.grade==='WATCH'?'#f0a500':'#ff6060';
+    const op=l.discountToNAV!=null?'.85':'.35';
+    s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}" fill-opacity="${op}" stroke="${col}" stroke-opacity=".4" stroke-width="1.5" 
+      style="cursor:pointer;transition:r .15s"
+      onmouseenter="showMtt(event,'${l._id}')" onmouseleave="hideMtt()"
+      onclick="event.stopPropagation();openModal('${l._id}')"
+      class="matrix-dot" data-id="${l._id}"
+    />`;
+  });
+
+  svg.innerHTML=s;
+}
+
+function showMtt(e,id){
+  const l=L.find(x=>x._id===id);if(!l)return;
+  const tt=document.getElementById('mtt');
+  const gc=GC[l.grade]||GC['PASS'];
+  tt.innerHTML=`
+    <div class="mt-head">${l.area} · ${bl(l.beds)} ${l.type}</div>
+    <div style="font-size:8.5px;color:var(--muted);margin-bottom:7px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.title||''}</div>
+    <div class="mt-row"><span>Grade</span><span class="mt-val" style="color:${gc.tx}">${l.grade}</span></div>
+    <div class="mt-row"><span>Ask</span><span class="mt-val">${f$(l.ask)}</span></div>
+    <div class="mt-row"><span>Discount to NAV</span><span class="mt-val" style="color:${l.discountToNAV>0?'var(--teal2)':'var(--amber)'}">${l.discountToNAV!=null?(l.discountToNAV>0?'+':'')+l.discountToNAV.toFixed(1)+'%':'No comp'}</span></div>
+    <div class="mt-row"><span>Gross Yield</span><span class="mt-val">${pc(l.grossYield)}</span></div>
+    <div class="mt-row"><span>Base IRR (3yr)</span><span class="mt-val" style="color:var(--teal2)">${pc(l.scenarios.base.irr)}</span></div>
+    <div class="mt-row"><span>Deal Score</span><span class="mt-val">${l.score}/10</span></div>
+    <div style="font-family:var(--pmono);font-size:8px;color:var(--dim);margin-top:6px">Click to open full analysis</div>
+  `;
+  tt.style.display='block';
+  tt.style.left=(e.clientX+14)+'px';
+  tt.style.top =(e.clientY-20)+'px';
+}
+function hideMtt(){document.getElementById('mtt').style.display='none';}
+
+/* ══════════════════════ IRR LAB ════════════════════════════════════════════ */
+function renderIRRList(){
+  const el=document.getElementById('irr-list');
+  el.innerHTML=L.map(l=>{
+    const gc=GC[l.grade]||GC['PASS'];
+    return`<div class="deal-pick ${_irrId===l._id?'sel':''}" onclick="loadIRR('${l._id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="dp-area">${l.area}</div>
+        <span class="badge" style="background:${gc.bg};border-color:${gc.br};color:${gc.tx};font-size:7px">${l.grade}</span>
+      </div>
+      <div class="dp-meta">${bl(l.beds)} ${l.type} · ${f$(l.ask)} · IRR ${pc(l.scenarios.base.irr)}</div>
+    </div>`;
+  }).join('');
+}
+
+function loadIRR(id){
+  _irrId=id;
+  renderIRRList();
+  const l=L.find(x=>x._id===id);if(!l)return;
+  renderIRRModel(l);
+}
+
+function renderIRRModel(l, assumptions){
+  const a = assumptions || { yield_: l.grossYield, vacancy: (MARKET_PARAMS[CURRENT_MARKET]?.vacancy||0.08)*100, opex: OPEX*100, hold: 3, bearApp: -5, baseApp: 5, bullApp: 20 };
+  const entry   = l.ask*(1+DLD_FEE);
+  const collRent = l.ask*(a.yield_/100)*(1-a.vacancy/100);
+  const noi     = collRent*(1-a.opex/100);
+
+  function irr3(capApp){
+    const exitV=l.ask*(1+capApp/100);
+    const cfs=[-entry,noi,noi,noi+exitV];
+    return calcIRR(cfs)*100;
+  }
+
+  const irrBear=irr3(a.bearApp), irrBase=irr3(a.baseApp), irrBull=irr3(a.bullApp);
+  const emBase=(noi*3+(l.ask*(1+a.baseApp/100))-entry)/entry+1;
+
+  // Cash flows table — base case
+  const cfRows=[
+    {yr:'Year 0 (Entry)',cf:-entry,note:'Ask + 4% DLD transfer fee'},
+    {yr:'Year 1',cf:noi,note:`NOI: AED ${Math.round(l.ask*a.yield_/100/1000)}K rent × ${(100-a.vacancy).toFixed(0)}% occ × ${(100-a.opex).toFixed(0)}% NIM`},
+    {yr:'Year 2',cf:noi,note:'Same as Year 1'},
+    {yr:'Year 3 (Exit)',cf:noi+l.ask*(1+a.baseApp/100),note:`NOI + exit at ${a.baseApp}% appreciation`},
+  ];
+
+  const panel=document.getElementById('irr-panel');
+  panel.innerHTML=`
+    <div class="irr-model-title">${l.area} · ${bl(l.beds)} ${l.type} — IRR Model</div>
+    <div style="font-family:var(--pmono);font-size:9px;color:var(--dim);margin-bottom:14px">Ask: ${f$(l.ask)} · Gross Yield: ${pc(l.grossYield)} · DLD NAV: ${l.dldP?f$(l.dldP):'N/A'}</div>
+
+    <div style="font-family:var(--pmono);font-size:8.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Adjust Assumptions</div>
+    <div class="irr-assumptions">
+      <div class="ia"><div class="ia-l">Gross Yield (%)</div>
+        <input class="ia-in" id="ia-y" value="${a.yield_.toFixed(1)}" type="number" step="0.1" onchange="rerunIRR('${l._id}')"></div>
+      <div class="ia"><div class="ia-l">Vacancy (%)</div>
+        <input class="ia-in" id="ia-v" value="${a.vacancy.toFixed(0)}" type="number" step="1" onchange="rerunIRR('${l._id}')"></div>
+      <div class="ia"><div class="ia-l">OpEx (% of rent)</div>
+        <input class="ia-in" id="ia-o" value="${a.opex.toFixed(0)}" type="number" step="1" onchange="rerunIRR('${l._id}')"></div>
+      <div class="ia"><div class="ia-l">Bear Cap Growth (%)</div>
+        <input class="ia-in" id="ia-bear" value="${a.bearApp}" type="number" step="1" style="color:var(--red2)" onchange="rerunIRR('${l._id}')"></div>
+      <div class="ia"><div class="ia-l">Base Cap Growth (%)</div>
+        <input class="ia-in" id="ia-base" value="${a.baseApp}" type="number" step="1" style="color:var(--blue2)" onchange="rerunIRR('${l._id}')"></div>
+      <div class="ia"><div class="ia-l">Bull Cap Growth (%)</div>
+        <input class="ia-in" id="ia-bull" value="${a.bullApp}" type="number" step="1" style="color:var(--teal2)" onchange="rerunIRR('${l._id}')"></div>
+    </div>
+
+    <div class="irr-scenarios">
+      <div class="sc sc-bear">
+        <div class="sc-label" style="color:var(--red2)">◼ Bear Case</div>
+        <div class="sc-irr" style="color:var(--red2)">${irrBear.toFixed(1)}%</div>
+        <div class="sc-em" style="color:var(--red2)">${((noi*3+(l.ask*(1+a.bearApp/100))-entry)/entry+1).toFixed(2)}× equity multiple</div>
+        <div class="sc-cap" style="color:var(--red2)">+${a.bearApp}% cap appreciation over 3yr</div>
+        <div style="height:1px;background:rgba(212,64,64,.2);margin:8px 0"></div>
+        <div style="font-family:var(--pmono);font-size:8.5px;color:var(--red2);opacity:.7">
+          ${irrBear>=HURDLE?'✓ Clears hurdle':'✗ Below '+HURDLE+'% hurdle'}
+        </div>
+      </div>
+      <div class="sc sc-base">
+        <div class="sc-label" style="color:var(--blue2)">◼ Base Case</div>
+        <div class="sc-irr" style="color:var(--blue2)">${irrBase.toFixed(1)}%</div>
+        <div class="sc-em" style="color:var(--blue2)">${emBase.toFixed(2)}× equity multiple</div>
+        <div class="sc-cap" style="color:var(--blue2)">+${a.baseApp}% cap appreciation over 3yr</div>
+        <div style="height:1px;background:rgba(64,128,224,.2);margin:8px 0"></div>
+        <div style="font-family:var(--pmono);font-size:8.5px;color:var(--blue2);opacity:.7">
+          ${irrBase>=HURDLE?'✓ Clears '+HURDLE+'% hurdle':'✗ Below '+HURDLE+'% hurdle'}
+        </div>
+      </div>
+      <div class="sc sc-bull">
+        <div class="sc-label" style="color:var(--teal2)">◼ Bull Case (Ceasefire Rally)</div>
+        <div class="sc-irr" style="color:var(--teal2)">${irrBull.toFixed(1)}%</div>
+        <div class="sc-em" style="color:var(--teal2)">${((noi*3+(l.ask*(1+a.bullApp/100))-entry)/entry+1).toFixed(2)}× equity multiple</div>
+        <div class="sc-cap" style="color:var(--teal2)">+${a.bullApp}% cap appreciation over 3yr</div>
+        <div style="height:1px;background:rgba(0,168,120,.2);margin:8px 0"></div>
+        <div style="font-family:var(--pmono);font-size:8.5px;color:var(--teal2);opacity:.7">
+          ${irrBull>=HURDLE?'✓ Clears hurdle':'✗ Below hurdle'}
+        </div>
+      </div>
+    </div>
+
+    <div style="font-family:var(--pmono);font-size:8.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Cash Flow Summary — Base Case</div>
+    <table class="cf-table">
+      <thead><tr><th>Year</th><th>Cash Flow</th><th>Note</th></tr></thead>
+      <tbody>
+        ${cfRows.map(r=>`<tr>
+          <td>${r.yr}</td>
+          <td style="color:${r.cf<0?'var(--red2)':'var(--teal2)'};font-weight:600">${r.cf<0?'('+f$(Math.abs(r.cf))+')':f$(r.cf)}</td>
+          <td style="color:var(--dim);font-size:8.5px">${r.note}</td>
+        </tr>`).join('')}
+        <tr style="background:var(--bg3)">
+          <td style="font-weight:600">Base IRR</td>
+          <td style="color:${irrBase>=HURDLE?'var(--teal2)':'var(--amber)'};font-weight:700;font-size:13px">${irrBase.toFixed(2)}%</td>
+          <td style="color:var(--muted)">3yr hold · hurdle ${HURDLE}%</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+}
+
+function rerunIRR(id){
+  const l=L.find(x=>x._id===id);if(!l)return;
+  const a={
+    yield_:  parseFloat(document.getElementById('ia-y')?.value)||l.grossYield,
+    vacancy: parseFloat(document.getElementById('ia-v')?.value)||(MARKET_PARAMS[CURRENT_MARKET]?.vacancy||0.08)*100,
+    opex:    parseFloat(document.getElementById('ia-o')?.value)||(OPEX*100),
+    bearApp: parseFloat(document.getElementById('ia-bear')?.value)||-5,
+    baseApp: parseFloat(document.getElementById('ia-base')?.value)||5,
+    bullApp: parseFloat(document.getElementById('ia-bull')?.value)||20,
+  };
+  renderIRRModel(l, a);
+}
+
+/* ══════════════════════ AREA INTELLIGENCE ══════════════════════════════════ */
+function renderAreaIntel(){
+  const grid=document.getElementById('area-grid');
+  grid.innerHTML=Object.keys(AREA_INTEL).sort((a,b)=>AREA_INTEL[b].demand-AREA_INTEL[a].demand).map(area=>{
+    const intel=AREA_INTEL[area];
+    const dldV=DLD_SQFT[area];
+    const areaDrops=L.filter(l=>l.area===area);
+    const supplyC=intel.supply<=2?'var(--teal2)':intel.supply===3?'var(--amber)':'var(--red2)';
+    const supplyT=['','Low','Low-Med','Medium','High','Very High'][intel.supply]||'—';
+    const liqT=['','Low','Medium','High'][intel.liquidity]||'—';
+    const liqC=['','var(--red2)','var(--amber)','var(--teal2)'][intel.liquidity]||'var(--muted)';
+    const supplyFill=intel.supply/5*100;
+    return`<div class="ac">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div class="ac-name">${area}</div>
+        ${areaDrops.length?`<span style="font-family:var(--pmono);font-size:8px;padding:2px 6px;background:rgba(240,165,0,.1);border:1px solid var(--bd2);color:var(--amber);border-radius:2px">${areaDrops.length} drop${areaDrops.length>1?'s':''}</span>`:''}
+      </div>
+      <div style="font-family:var(--pmono);font-size:8px;color:var(--dim);margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--bd)">${intel.type}</div>
+      <div class="ac-metrics">
+        <div class="acm"><div class="acm-l">DLD /sqft</div><div class="acm-v" style="color:var(--amber)">${dldV?dldV.toLocaleString():'—'}</div></div>
+        <div class="acm"><div class="acm-l">Demand Score</div><div class="acm-v" style="color:${intel.demand>=8?'var(--teal2)':intel.demand>=6?'var(--blue2)':'var(--amber)'}">${intel.demand}/10</div></div>
+        <div class="acm"><div class="acm-l">Supply Risk</div><div class="acm-v" style="color:${supplyC}">${supplyT}</div></div>
+        <div class="acm"><div class="acm-l">Liquidity</div><div class="acm-v" style="color:${liqC}">${liqT}</div></div>
+        <div class="acm"><div class="acm-l">YoY Price ↑</div><div class="acm-v" style="color:${intel.yoy>=8?'var(--teal2)':intel.yoy>=4?'var(--blue2)':'var(--amber)'}">+${intel.yoy}%</div></div>
+        <div class="acm"><div class="acm-l">Pipeline</div><div class="acm-v" style="color:${intel.pipeline==='Very Low'||intel.pipeline==='Low'?'var(--teal2)':intel.pipeline==='Medium'?'var(--amber)':'var(--red2)'}">${intel.pipeline}</div></div>
+      </div>
+      <div class="risk-bar"><div class="risk-fill" style="width:${supplyFill}%;background:${supplyC}"></div></div>
+      ${areaDrops.length?`<div class="ac-drops">Best: <span style="color:var(--teal2)">${pc(Math.max(...areaDrops.map(l=>l.scenarios.base.irr)))} IRR</span> · Avg score: <span style="color:var(--amber)">${(areaDrops.reduce((s,l)=>s+l.score,0)/areaDrops.length).toFixed(1)}</span></div>`:''}
+      <div style="font-family:var(--psans);font-size:9px;color:var(--dim);margin-top:8px;line-height:1.6">${intel.thesis}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════ PORTFOLIO BUILDER ══════════════════════════════════ */
+function togglePort(id){
+  if(PORT.includes(id)) PORT=PORT.filter(x=>x!==id);
+  else PORT.push(id);
+  render();
+  renderPortPicker();
+  updatePortSummary();
+}
+
+function renderPortPicker(){
+  const fa=document.getElementById('pa-fa')?.value||'';
+  const fg=document.getElementById('pa-fg')?.value||'';
+  const filtered=[...L].filter(l=>{
+    if(fa&&l.area!==fa)return false;
+    if(fg&&l.grade!==fg)return false;
+    return true;
+  }).sort((a,b)=>b.score-a.score);
+  document.getElementById('port-picker').innerHTML=filtered.map(l=>{
+    const gc=GC[l.grade]||GC['PASS'];
+    const inPort=PORT.includes(l._id);
+    return`<div class="port-item">
+      <div style="flex:1">
+        <div class="pi-area">${l.area} · ${bl(l.beds)} ${l.type}</div>
+        <div class="pi-meta">${f$(l.ask)} · Score ${l.score} · <span class="badge" style="background:${gc.bg};border-color:${gc.br};color:${gc.tx};font-size:6.5px">${l.grade}</span></div>
+      </div>
+      <div class="pi-irr">${pc(l.scenarios.base.irr)}</div>
+      <button class="${inPort?'add-btn-small added':'add-btn-small add-green'}" onclick="togglePort('${l._id}')" style="font-size:8px;padding:3px 8px">${inPort?'✓':'+'}</button>
+    </div>`;
+  }).join('')||'<div style="color:var(--dim);font-family:var(--pmono);font-size:10px;padding:20px;text-align:center">No deals match filters</div>';
+}
+
+function updatePortSummary(){
+  const items=PORT.map(id=>L.find(x=>x._id===id)).filter(Boolean);
+  if(!items.length){
+    ['pk-cap','pk-yld','pk-irr','pk-sc','pk-noi'].forEach(id=>document.getElementById(id).textContent='—');
+    document.getElementById('pk-n').textContent='0';
+    document.getElementById('port-items').innerHTML=`<div style="padding:24px;text-align:center;color:var(--dim);font-family:var(--pmono);font-size:10px;border:1px dashed var(--vdim);border-radius:2px">No deals added yet.</div>`;
+    return;
+  }
+  const totalCap=items.reduce((s,l)=>s+l.ask,0);
+  const wAvgYld=items.reduce((s,l)=>s+l.grossYield*(l.ask/totalCap),0);
+  const wAvgIRR=items.reduce((s,l)=>s+l.scenarios.base.irr*(l.ask/totalCap),0);
+  const wAvgSc =items.reduce((s,l)=>s+l.score*(l.ask/totalCap),0);
+  const totalNOI=items.reduce((s,l)=>s+l.noi,0);
+  document.getElementById('pk-cap').textContent=f$s(totalCap);
+  document.getElementById('pk-yld').textContent=pc(wAvgYld);
+  document.getElementById('pk-irr').textContent=pc(wAvgIRR);
+  document.getElementById('pk-sc').textContent=wAvgSc.toFixed(1)+'/10';
+  document.getElementById('pk-noi').textContent=f$s(totalNOI)+'/yr';
+  document.getElementById('pk-n').textContent=items.length;
+  document.getElementById('port-items').innerHTML=items.map(l=>{
+    const gc=GC[l.grade]||GC['PASS'];
+    const weight=(l.ask/totalCap*100).toFixed(1);
+    return`<div class="port-item" style="cursor:pointer" onclick="openModal('${l._id}')">
+      <div style="flex:1">
+        <div class="pi-area">${l.area} · ${bl(l.beds)} ${l.type}</div>
+        <div class="pi-meta">${f$(l.ask)} · ${weight}% weight · IRR <span style="color:var(--teal2)">${pc(l.scenarios.base.irr)}</span></div>
+      </div>
+      <div style="font-family:var(--pmono);font-size:10px;font-weight:600;color:var(--amber);white-space:nowrap">${pc(l.grossYield)}</div>
+      <button class="pi-remove" onclick="event.stopPropagation();togglePort('${l._id}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════ GITHUB CONFIG ══════════════════════════════════════ */
+function toggleGHPanel() {
+  const panel = document.getElementById('gh-panel');
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : 'block';
+  if (!isOpen) {
+    // Pre-fill saved values
+    const u = localStorage.getItem('gh_user') || '';
+    const r = localStorage.getItem('gh_repo') || '';
+    document.getElementById('gh-user').value = u;
+    document.getElementById('gh-repo').value = r;
+    previewGHUrl();
+    document.getElementById('gh-user').focus();
+  }
+}
+
+function previewGHUrl() {
+  const u = document.getElementById('gh-user')?.value?.trim();
+  const r = document.getElementById('gh-repo')?.value?.trim();
+  const el = document.getElementById('gh-preview');
+  if (!el) return;
+  if (u && r) {
+    el.innerHTML = `Will fetch: <span style="color:var(--teal2)">https://raw.githubusercontent.com/${u}/${r}/main/data/drops.json</span>`;
+  } else {
+    el.textContent = '';
+  }
+}
+
+function saveGHConfig() {
+  const u = document.getElementById('gh-user')?.value?.trim();
+  const r = document.getElementById('gh-repo')?.value?.trim();
+  if (!u || !r) { alert('Enter both your GitHub username and repository name'); return; }
+  localStorage.setItem('gh_user', u);
+  localStorage.setItem('gh_repo', r);
+  document.getElementById('gh-btn').style.borderColor = 'rgba(0,168,120,.4)';
+  document.getElementById('gh-btn').style.color = 'var(--teal2)';
+  document.getElementById('gh-btn').textContent = '⬡ GitHub ✓';
+  document.getElementById('gh-panel').style.display = 'none';
+  loadScreen();
+}
+
+function clearGHConfig() {
+  localStorage.removeItem('gh_user');
+  localStorage.removeItem('gh_repo');
+  document.getElementById('gh-user').value = '';
+  document.getElementById('gh-repo').value = '';
+  document.getElementById('gh-btn').style.borderColor = '';
+  document.getElementById('gh-btn').style.color = '';
+  document.getElementById('gh-btn').textContent = '⚙ GitHub';
+  document.getElementById('gh-preview').textContent = '';
+}
+
+/* ══════════════════════ MARKET MODE ════════════════════════════════════════ */
+function setMarketMode(mode) {
+  CURRENT_MARKET = mode;
+  const mp = MARKET_PARAMS[mode];
+  document.getElementById('c-hurdle').textContent = `HURDLE ${HURDLE}% · ${mp.label.toUpperCase()} MKT`;
+  // Re-enrich all listings with new market params if already loaded
+  if (L.length > 0) {
+    const seeds = L.map(l => ({
+      id: l.id, area: l.area, type: l.type, beds: l.beds,
+      ask: l.ask, was: l.was, drop: l.drop, sqft: l.sqft,
+      title: l.title, agency: l.agency,
+    }));
+    L = seeds.map(s => enrich(s));
+    updateKPIs(); render(); renderMatrix(); renderIRRList();
+    if (_irrId) {
+      const l = L.find(x => x._id === _irrId);
+      if (l) renderIRRModel(l);
+    }
+  }
+}
+
+
+function tab(t){
+  ['screen','matrix','irr','area','port'].forEach(x=>{const el=document.getElementById('tab-'+x);if(el)el.style.display=x===t?'block':'none';});
+  document.querySelectorAll('.nt').forEach((b,i)=>b.classList.toggle('on',['screen','matrix','irr','area','port'][i]===t));
+}
+
+/* ══════════════════════ MODAL ══════════════════════════════════════════════ */
+function openModal(id){
+  const l=L.find(x=>x._id===id);if(!l)return;
+  _openId=id;
+  const gc=GC[l.grade]||GC['PASS'];
+  document.getElementById('m-tag').textContent=`DXB RE SCREEN · ${l.area.toUpperCase()} · ${bl(l.beds)} ${l.type.toUpperCase()} · BAYUT ${l.id}`;
+  document.getElementById('m-title').textContent=l.title||`${l.type} · ${l.area}`;
+  document.getElementById('m-sub').innerHTML=`<span class="badge" style="background:${gc.bg};border-color:${gc.br};color:${gc.tx}">${l.grade}</span>&nbsp;&nbsp;Score ${l.score}/10&nbsp;&nbsp;·&nbsp;&nbsp;${l.agency||''}`;
+
+  document.getElementById('m-kpis').innerHTML=[
+    {l:'Ask Price',     v:f$(l.ask),                    c:'var(--cream)'},
+    {l:'DLD NAV (Comp)',v:l.dldP?f$(l.dldP):'No comp', c:'var(--muted)'},
+    {l:'Discount to NAV',v:l.discountToNAV!=null?(l.discountToNAV>0?'+':'')+l.discountToNAV.toFixed(1)+'%':'—',
+      c:!l.discountToNAV?'var(--muted)':l.discountToNAV>0?'var(--teal2)':'var(--amber)'},
+    {l:'Gross Yield',   v:pc(l.grossYield),             c:l.grossYield>=HURDLE?'var(--teal2)':'var(--amber)'},
+    {l:'Yield Spread',  v:(l.yieldSprd>=0?'+':'')+l.yieldSprd.toFixed(2)+'% vs hurdle', c:l.yieldSprd>=0?'var(--teal2)':'var(--red2)'},
+    {l:'Annual NOI',    v:f$(l.noi),                    c:'var(--teal2)'},
+    {l:'Bid Target',    v:f$(l.bid),                    c:'var(--blue2)'},
+    {l:'Price Drop',    v:l.drop+'%',                   c:'var(--red2)'},
+    {l:'AED Saved',     v:f$(l.saved),                  c:'var(--teal2)'},
+    {l:'PSF',           v:l.psf?l.psf.toLocaleString():' —', c:'var(--muted)'},
+  ].map(k=>`<div class="mk"><div class="mkl">${k.l}</div><div class="mkv" style="color:${k.c}">${k.v}</div></div>`).join('');
+
+  document.getElementById('m-scenarios').innerHTML=[
+    {key:'bear',label:'Bear Case',col:'var(--red2)',sc:'sc-bear'},
+    {key:'base',label:'Base Case',col:'var(--blue2)',sc:'sc-base'},
+    {key:'bull',label:'Bull Case',col:'var(--teal2)',sc:'sc-bull'},
+  ].map(s=>`<div class="sc ${s.sc}">
+    <div class="sc-label" style="color:${s.col}">${s.label}</div>
+    <div class="sc-irr" style="color:${s.col}">${pc(l.scenarios[s.key].irr)}</div>
+    <div class="sc-em" style="color:${s.col}">${l.scenarios[s.key].em.toFixed(2)}× equity multiple</div>
+    <div class="sc-cap" style="color:${s.col}">${l.scenarios[s.key].capApp>0?'+':''}${l.scenarios[s.key].capApp}% cap appn.</div>
+  </div>`).join('');
+
+  document.getElementById('m-acts').innerHTML=`
+    <a href="${l.portalUrl}" target="_blank" class="mpl" style="background:rgba(240,165,0,.07);border-color:rgba(240,165,0,.35);color:var(--amber)">⚡ View on Bayut ↗</a>
+    <button class="btn b-teal" onclick="loadIRR('${l._id}');tab('irr');document.getElementById('ov').classList.remove('open')">Open in IRR Lab</button>
+    <span style="font-family:var(--pmono);font-size:9.5px;padding:5px 11px;background:rgba(64,128,224,.07);border:1px solid rgba(64,128,224,.25);color:var(--blue2);border-radius:2px">Bid: ${f$(l.bid)}</span>`;
+
+  document.getElementById('m-out').textContent='Click "Generate Analysis" to produce the full investment memo — thesis, risk factors, bid narrative and IC recommendation.';
+  document.getElementById('m-out').style.color='var(--dim)';
+  document.getElementById('m-aht').textContent='◈ Investment Analysis';
+  document.getElementById('m-show').style.display='';
+
+  document.getElementById('ov').classList.add('open');
+}
+
+function showAnalysis(){
+  const l=L.find(x=>x._id===_openId);if(!l)return;
+  document.getElementById('m-show').style.display='none';
+  const intel=AREA_INTEL[l.area]||{supply:3,demand:6,thesis:'—'};
+  const bidDisc=(((l.ask-l.bid)/l.ask)*100).toFixed(1);
+  const dldNarr=!l.dldP?`DLD AED/sqft reference for ${l.area}: ${DLD_SQFT[l.area]?.toLocaleString()||'—'}`
+    :l.discountToNAV>10?`Ask price is ${l.discountToNAV.toFixed(1)}% below DLD average completed sale price (${f$(l.dldP)}) — trading below comparable transactions. Margin of safety is substantial.`
+    :l.discountToNAV>0?`Ask is ${l.discountToNAV.toFixed(1)}% below DLD average completed sale (${f$(l.dldP)}) — modest discount to comps, room to push bid further.`
+    :l.discountToNAV>-10?`Ask is ${Math.abs(l.discountToNAV).toFixed(1)}% above DLD average completed sale (${f$(l.dldP)}). Counter at or below DLD comp.`
+    :`Ask is ${Math.abs(l.discountToNAV).toFixed(1)}% above DLD comps — seller is anchored above market. Hard counter required.`;
+
+  const risks=[];
+  if(intel.supply>=4) risks.push(`Significant off-plan pipeline in ${l.area} — rental yield compression likely as new handovers compete; underwrite conservatively on exit cap rate`);
+  if(l.grossYield<HURDLE) risks.push(`Gross yield (${pc(l.grossYield)}) is below the fund's ${HURDLE}% hurdle — deal is primarily a capital appreciation play; income does not clear hurdle rate at entry`);
+  if(l.discountToNAV!=null&&l.discountToNAV<-15) risks.push(`Ask ${Math.abs(l.discountToNAV).toFixed(1)}% above DLD comps — overpay risk if market corrects further; DLD anchor is critical in negotiations`);
+  if(Math.abs(l.drop)<8) risks.push(`Limited price cut (${l.drop}%) — seller has shown only modest distress; full negotiating leverage not yet unlocked; patience may yield better entry`);
+  if(l.type==='Apartment'&&/Marina|Downtown|JBR/.test(l.area)) risks.push('Secondary market apartment; geopolitical sentiment is creating a buying window, but recovery timeline is uncertain — position sizing should reflect this');
+  if(l.type==='Villa'||/Springs|Meadows|Ranches/.test(l.area)) risks.push(`Villa community supply is structurally constrained (${intel.pipeline} pipeline) — downside more protected than apartments; end-user demand provides floor`);
+  risks.push('Regional conflict discount: the current pricing dislocation is the entry opportunity; any ceasefire/normalisation signal triggers a recovery. Buy on the ceasefire fear, not after the ceasefire.');
+  risks.push('Transaction costs: 4% DLD transfer fee + 2% agent commission + ~AED 30K legal/admin = ~6% all-in entry cost; underwrite net of this');
+
+  const text=`DEAL THESIS
+${'─'.repeat(50)}
+${l.area} · ${bl(l.beds)} ${l.type} — Grade: ${l.grade} (Score: ${l.score}/10)
+Seller has cut ${Math.abs(l.drop)}% from AED ${(l.was/1e6).toFixed(2)}M → AED ${(l.ask/1e6).toFixed(2)}M. AED ${(l.saved/1000).toFixed(0)}K reduction signals ${l.drop<=-15?'motivated seller seeking exit certainty':l.drop<=-10?'active negotiator aware of market conditions':'seller testing price discovery in a softer market'}.
+
+${dldNarr}
+
+Area thesis: ${intel.thesis}
+
+INCOME & RETURN ANALYSIS
+${'─'.repeat(50)}
+Gross yield at ask:    ${pc(l.grossYield)} vs ${HURDLE}% hurdle → spread ${l.yieldSprd>0?'+':''}${l.yieldSprd.toFixed(2)}%
+Annual NOI:            ${f$(l.noi)} (${(MARKET_PARAMS[CURRENT_MARKET]?.vacancy*100||8).toFixed(0)}% vacancy · ${(OPEX*100).toFixed(0)}% opex)
+Cap rate:              ${pc(l.capRate)}
+
+3-Year IRR Scenarios:
+  Bear (${l.scenarios.bear.capApp}% cap growth):  ${pc(l.scenarios.bear.irr)} · ${l.scenarios.bear.em.toFixed(2)}× equity multiple
+  Base (+${l.scenarios.base.capApp}% cap growth):  ${pc(l.scenarios.base.irr)} · ${l.scenarios.base.em.toFixed(2)}× equity multiple ${l.scenarios.base.irr>=HURDLE?'✓ Clears hurdle':'✗ Below hurdle'}
+  Bull (+${l.scenarios.bull.capApp}% cap growth):  ${pc(l.scenarios.bull.irr)} · ${l.scenarios.bull.em.toFixed(2)}× equity multiple ← ceasefire rally
+
+RISK FACTORS
+${'─'.repeat(50)}
+${risks.map((r,i)=>`${i+1}. ${r}`).join('\n')}
+
+IC RECOMMENDATION
+${'─'.repeat(50)}
+Bid: ${f$(l.bid)} — ${bidDisc}% below ask.${l.dldP?`\nAnchor: DLD comparable transactions average ${f$(l.dldP)}. Present as "market clearing price" — not a negotiating tactic, a documented fact.`:''}
+
+Offer structure: Clean cash, no financing contingency, 48-hour decision deadline with 10-business-day completion.
+Sellers who have already cut ${Math.abs(l.drop)}% in this market want certainty. Price is less important than speed and surety of close.
+If rejected at ${f$(l.bid)}, withdraw. Revisit in 10–14 days — motivated sellers in a softening market almost always re-engage at the buyer's number.
+
+Entry cost all-in: ${f$(l.ask*1.06)} (ask + 4% DLD + 2% agent + admin).
+Breakeven yield on all-in cost: ${(l.noi/l.ask*100/1.06).toFixed(1)}%.`;
+
+  document.getElementById('m-out').textContent=text;
+  document.getElementById('m-out').style.color='var(--muted)';
+  document.getElementById('m-aht').textContent='◈ Investment Analysis · Complete';
+}
+
+function closeMd(e){if(!e||e.target===document.getElementById('ov'))document.getElementById('ov').classList.remove('open');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('ov').classList.remove('open');});
+
+/* ══════════════════════ INIT ═══════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('c-dt').textContent=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'}).toUpperCase();
+  if(_key){document.getElementById('key-btn').style.display='none';document.getElementById('key-ok').style.display='flex';}
+  document.getElementById('url-input')?.addEventListener?.('keydown',e=>{if(e.key==='Enter')loadScreen();});
+  // Restore GitHub config button state
+  const u=localStorage.getItem('gh_user'), r=localStorage.getItem('gh_repo');
+  if(u&&r){
+    const btn=document.getElementById('gh-btn');
+    if(btn){btn.style.borderColor='rgba(0,168,120,.4)';btn.style.color='var(--teal2)';btn.textContent='⬡ GitHub ✓';}
+  }
+});
+</script>
+</body>
+</html>

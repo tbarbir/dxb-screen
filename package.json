@@ -1,0 +1,15 @@
+{
+  "name": "gulf-price-intelligence",
+  "version": "2.0.0",
+  "description": "Dubai property price drop tracker — GitHub Actions edition (free)",
+  "main": "scraper.js",
+  "scripts": {
+    "scrape": "node scraper.js"
+  },
+  "dependencies": {
+    "puppeteer": "^21.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
