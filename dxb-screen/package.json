@@ -1,11 +1,41 @@
-{
-  "name": "dxb-re-screen",
-  "version": "2.0.0",
-  "description": "Dubai property price drop scraper",
-  "main": "scraper.js",
-  "scripts": { "start": "node scraper.js" },
-  "dependencies": {
-    "axios": "^1.6.0",
-    "cheerio": "^1.0.0"
-  }
-}
+name: Dubai Property Price Drop Tracker
+
+on:
+  schedule:
+    - cron: '0 22 * * *'
+    - cron: '0 4  * * *'
+    - cron: '0 10 * * *'
+    - cron: '0 16 * * *'
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run scraper
+        run: node scraper.js
+        env:
+          CI: true
+
+      - name: Commit updated data
+        run: |
+          git config user.name  "GPI Scraper Bot"
+          git config user.email "bot@gulf-price-intelligence.local"
+          git add data/listings.json data/drops.json data/stats.json
+          git diff --staged --quiet || git commit -m "scrape: $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push
