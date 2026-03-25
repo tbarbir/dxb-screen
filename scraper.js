@@ -226,7 +226,7 @@ async function main() {
     if (l.drop_from_first < 0) drops.push(l);
   }
 
-  drops.sort((a, b) => a.drop_from_first - b.drop_from_first);
+  drops.sort((a, b) => a.drop_from_prev - b.drop_from_prev);
 
   const stats = {
     runAt, isFirstRun,
