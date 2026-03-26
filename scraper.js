@@ -139,6 +139,30 @@ function parseListings(html, areaName, purpose) {
   return listings;
 }
 
+async function scrapeSearchPage(seen, allNew, purpose) {
+  // Paginate through panicselling search — up to 20 pages × ~100 listings = 2000 max
+  let page = 1;
+  let total = 0;
+  while (page <= 20) {
+    const url = `https://panicselling.com/list/?purpose=for-${purpose}&sort=drop&page=${page}`;
+    log(`  Search page ${page} (${purpose})`);
+    const html = await fetchPage(url);
+    if (!html) break;
+    const listings = parseListings(html, '', purpose);
+    if (!listings.length) break; // no more pages
+    let n = 0;
+    listings.forEach(l => {
+      const key = l.listing_id + '_' + l.purpose;
+      if (!seen.has(key)) { seen.add(key); allNew.push(l); n++; total++; }
+    });
+    log(`    ${listings.length} listings, ${n} new`);
+    if (listings.length < 10) break; // last page
+    page++;
+    await sleep(600);
+  }
+  log(`  Search total (${purpose}): ${total} new listings`);
+}
+
 async function main() {
   const runAt  = new Date().toISOString();
   const allNew = [];
@@ -147,12 +171,24 @@ async function main() {
   log('DXB RE Screen v2 — Scrape starting');
   log(`Areas: ${AREAS.length} (including rentals and Abu Dhabi)`);
 
-  // Main page (sale drops)
+  // TIER 1: Paginated search — gets ALL listings not just top drops
+  log('\n-- SEARCH PAGES (all listings) --');
+  await scrapeSearchPage(seen, allNew, 'sale');
+  await sleep(800);
+  await scrapeSearchPage(seen, allNew, 'rent');
+  await sleep(800);
+
+  log(`\nAfter search pages: ${allNew.length} listings`);
+
+  // TIER 2: Area pages — catches anything search missed
+  log('\n-- AREA PAGES (supplemental) --');
+  // Main page
   const mainHtml = await fetchPage('https://panicselling.com/list/?purpose=for-sale&sort=drop');
   if (mainHtml) {
     const main = parseListings(mainHtml, '', 'sale');
-    log(`Main page: ${main.length} listings`);
-    main.forEach(l => { if (!seen.has(l.listing_id+'_'+l.purpose)) { seen.add(l.listing_id+'_'+l.purpose); allNew.push(l); }});
+    let n = 0;
+    main.forEach(l => { if (!seen.has(l.listing_id+'_'+l.purpose)) { seen.add(l.listing_id+'_'+l.purpose); allNew.push(l); n++; }});
+    log(`Main page: ${main.length} parsed, ${n} new`);
   }
   await sleep(500);
 
@@ -169,9 +205,9 @@ async function main() {
         const key = l.listing_id + '_' + l.purpose;
         if (!seen.has(key)) { seen.add(key); l.area = area.name; allNew.push(l); n++; }
       });
-      log(`  ${listings.length} listings, ${n} new`);
+      if (n > 0) log(`  ${listings.length} listings, ${n} new`);
     }
-    await sleep(500);
+    await sleep(400);
   }
 
   log(`\nTotal unique: ${allNew.length}`);
@@ -226,7 +262,7 @@ async function main() {
     if (l.drop_from_first < 0) drops.push(l);
   }
 
-  drops.sort((a, b) => a.drop_from_prev - b.drop_from_prev);
+  drops.sort((a, b) => a.drop_from_first - b.drop_from_first);
 
   const stats = {
     runAt, isFirstRun,
