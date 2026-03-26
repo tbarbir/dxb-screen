@@ -140,27 +140,33 @@ function parseListings(html, areaName, purpose) {
 }
 
 async function scrapeSearchPage(seen, allNew, purpose) {
-  // Paginate through panicselling search — up to 20 pages × ~100 listings = 2000 max
-  let page = 1;
+  // Try multiple URL patterns to maximise listings captured
+  const urls = [
+    `https://panicselling.com/list/?purpose=for-${purpose}&sort=drop&limit=500`,
+    `https://panicselling.com/list/?purpose=for-${purpose}&sort=drop&per_page=500`,
+    `https://panicselling.com/list/?purpose=for-${purpose}&sort=drop&show=all`,
+    `https://panicselling.com/list/?purpose=for-${purpose}&sort=drop&offset=0&limit=500`,
+    `https://panicselling.com/list/?purpose=for-${purpose}&sort=saved`,
+    `https://panicselling.com/list/?purpose=for-${purpose}&sort=price_asc`,
+    `https://panicselling.com/list/?purpose=for-${purpose}&sort=price_desc`,
+    `https://panicselling.com/list/?purpose=for-${purpose}&sort=newest`,
+    `https://panicselling.com/list/?purpose=for-${purpose}&min_drop=1`,
+    `https://panicselling.com/list/?purpose=for-${purpose}&min_drop=3`,
+  ];
   let total = 0;
-  while (page <= 20) {
-    const url = `https://panicselling.com/list/?purpose=for-${purpose}&sort=drop&page=${page}`;
-    log(`  Search page ${page} (${purpose})`);
+  for (const url of urls) {
     const html = await fetchPage(url);
-    if (!html) break;
+    if (!html) { await sleep(400); continue; }
     const listings = parseListings(html, '', purpose);
-    if (!listings.length) break; // no more pages
     let n = 0;
     listings.forEach(l => {
       const key = l.listing_id + '_' + l.purpose;
       if (!seen.has(key)) { seen.add(key); allNew.push(l); n++; total++; }
     });
-    log(`    ${listings.length} listings, ${n} new`);
-    if (listings.length < 10) break; // last page
-    page++;
-    await sleep(600);
+    if (n > 0) log(`  +${n} new from: ${url.split('panicselling.com')[1]}`);
+    await sleep(500);
   }
-  log(`  Search total (${purpose}): ${total} new listings`);
+  log(`  Total new from search URLs (${purpose}): ${total}`);
 }
 
 async function main() {
