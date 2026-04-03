@@ -165,23 +165,16 @@ function parseListings(html, areaName, purpose) {
 }
 
 async function scrapeSearchPage(seen, allNew, purpose) {
-  // Try multiple URL patterns to maximise listings captured
+  // Only hit URLs we know return data
   const urls = [
-    `https://panicselling.com/list/?purpose=for-${purpose}&sort=drop&limit=500`,
-    `https://panicselling.com/list/?purpose=for-${purpose}&sort=drop&per_page=500`,
-    `https://panicselling.com/list/?purpose=for-${purpose}&sort=drop&show=all`,
-    `https://panicselling.com/list/?purpose=for-${purpose}&sort=drop&offset=0&limit=500`,
+    `https://panicselling.com/list/?purpose=for-${purpose}&sort=drop`,
     `https://panicselling.com/list/?purpose=for-${purpose}&sort=saved`,
-    `https://panicselling.com/list/?purpose=for-${purpose}&sort=price_asc`,
-    `https://panicselling.com/list/?purpose=for-${purpose}&sort=price_desc`,
     `https://panicselling.com/list/?purpose=for-${purpose}&sort=newest`,
-    `https://panicselling.com/list/?purpose=for-${purpose}&min_drop=1`,
-    `https://panicselling.com/list/?purpose=for-${purpose}&min_drop=3`,
   ];
   let total = 0;
   for (const url of urls) {
     const html = await fetchPage(url);
-    if (!html) { await sleep(400); continue; }
+    if (!html) { await sleep(300); continue; }
     const listings = parseListings(html, '', purpose);
     let n = 0;
     listings.forEach(l => {
@@ -189,9 +182,9 @@ async function scrapeSearchPage(seen, allNew, purpose) {
       if (!seen.has(key)) { seen.add(key); allNew.push(l); n++; total++; }
     });
     if (n > 0) log(`  +${n} new from: ${url.split('panicselling.com')[1]}`);
-    await sleep(500);
+    await sleep(400);
   }
-  log(`  Total new from search URLs (${purpose}): ${total}`);
+  log(`  Total new (${purpose}): ${total}`);
 }
 
 async function main() {
