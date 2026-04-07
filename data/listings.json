@@ -16,10 +16,10 @@
     "title": "Amazing 2 Beds In Downtown 1 Min From Burj Khalifa",
     "agency": "fäm Properties - B",
     "portal_url": "https://www.bayut.com/property/details-14328167.html",
-    "detected_at": "2026-04-07T05:25:45.398Z",
+    "detected_at": "2026-04-07T08:18:26.144Z",
     "first_seen": "2026-04-06T18:37:29.027Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 4400000,
@@ -44,41 +44,13 @@
     "title": "Fully Upgraded | Full Burj View | Unique Layout",
     "agency": "Hamptons Internati",
     "portal_url": "https://www.bayut.com/property/details-14568277.html",
-    "detected_at": "2026-04-07T05:25:45.398Z",
+    "detected_at": "2026-04-07T08:18:26.144Z",
     "first_seen": "2026-04-06T23:53:44.283Z",
     "drop_count": 0,
     "days_on_market": 0,
     "price_history": [
       {
         "price": 7500000,
-        "date": "2026-04-06T23:53:44.283Z"
-      }
-    ]
-  },
-  {
-    "listing_id": "13646057",
-    "area": "Al Raha Beach",
-    "type": "Apartment",
-    "beds": 2,
-    "purpose": "sale",
-    "current_price": 1930000,
-    "previous_price": 2380000,
-    "first_price": 1930000,
-    "drop_from_prev": -18.8,
-    "drop_from_first": 0,
-    "saved_aed": 0,
-    "sqft": 1469,
-    "psf": 1314,
-    "title": "2BR+M || Amazing Community || Handover 2029 ||",
-    "agency": "Advisors Propertie",
-    "portal_url": "https://www.bayut.com/property/details-13646057.html",
-    "detected_at": "2026-04-07T05:25:45.399Z",
-    "first_seen": "2026-04-06T23:53:44.283Z",
-    "drop_count": 0,
-    "days_on_market": 0,
-    "price_history": [
-      {
-        "price": 1930000,
         "date": "2026-04-06T23:53:44.283Z"
       }
     ]
@@ -100,7 +72,7 @@
     "title": "Rare | Private Garden Terrace | Open Plan",
     "agency": "Exclusive Links Re",
     "portal_url": "https://www.bayut.com/property/details-14437325.html",
-    "detected_at": "2026-04-07T05:25:45.399Z",
+    "detected_at": "2026-04-07T08:18:26.144Z",
     "first_seen": "2026-04-06T23:53:44.283Z",
     "drop_count": 0,
     "days_on_market": 0,
@@ -128,10 +100,10 @@
     "title": "High-End Turnkey | Extended | Vacant",
     "agency": "Provident Real Est",
     "portal_url": "https://www.bayut.com/property/details-14585344.html",
-    "detected_at": "2026-04-07T05:25:45.399Z",
+    "detected_at": "2026-04-07T08:18:26.145Z",
     "first_seen": "2026-04-06T18:37:29.027Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 9250000,
@@ -156,10 +128,10 @@
     "title": "Exclusive Private Beach Living | Corner | Vacant",
     "agency": "AKT Real Estate Br",
     "portal_url": "https://www.bayut.com/property/details-13717355.html",
-    "detected_at": "2026-04-07T05:25:45.399Z",
+    "detected_at": "2026-04-07T08:18:26.145Z",
     "first_seen": "2026-04-06T18:37:29.028Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 4800000,
@@ -184,42 +156,14 @@
     "title": "Best Price | Exclusive | Large | 5 Star Living",
     "agency": "Hamptons Internati",
     "portal_url": "https://www.bayut.com/property/details-14533453.html",
-    "detected_at": "2026-04-07T05:25:45.400Z",
+    "detected_at": "2026-04-07T08:18:26.145Z",
     "first_seen": "2026-04-06T18:37:29.028Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 9700000,
         "date": "2026-04-06T18:37:29.028Z"
-      }
-    ]
-  },
-  {
-    "listing_id": "14547067",
-    "area": "Masdar City",
-    "type": "Apartment",
-    "beds": 2,
-    "purpose": "sale",
-    "current_price": 950000,
-    "previous_price": 1100000,
-    "first_price": 950000,
-    "drop_from_prev": -13.6,
-    "drop_from_first": 0,
-    "saved_aed": 0,
-    "sqft": 879,
-    "psf": 1081,
-    "title": "Luxury 2BR Residence | Modern Layout | Hot Deal",
-    "agency": "The Housing Enterp",
-    "portal_url": "https://www.bayut.com/property/details-14547067.html",
-    "detected_at": "2026-04-07T05:25:45.400Z",
-    "first_seen": "2026-04-06T23:53:44.285Z",
-    "drop_count": 0,
-    "days_on_market": 0,
-    "price_history": [
-      {
-        "price": 950000,
-        "date": "2026-04-06T23:53:44.285Z"
       }
     ]
   },
@@ -240,10 +184,10 @@
     "title": "Luxury 2BR Fully Furnished | High Demand Location |",
     "agency": "Next Level Real Es",
     "portal_url": "https://www.bayut.com/property/details-13746756.html",
-    "detected_at": "2026-04-07T05:25:45.400Z",
+    "detected_at": "2026-04-07T08:18:26.145Z",
     "first_seen": "2026-04-06T18:37:29.029Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 2530000,
@@ -268,10 +212,10 @@
     "title": "Fully Upgraded | Vacant on Transfer | Park View",
     "agency": "Savills Dubai",
     "portal_url": "https://www.bayut.com/property/details-13983957.html",
-    "detected_at": "2026-04-07T05:25:45.400Z",
+    "detected_at": "2026-04-07T08:18:26.146Z",
     "first_seen": "2026-04-06T18:37:29.029Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 10500000,
@@ -296,10 +240,10 @@
     "title": "Stunning 3BR in High Floor | Panoramic Views",
     "agency": "Benchmark Properti",
     "portal_url": "https://www.bayut.com/property/details-13099361.html",
-    "detected_at": "2026-04-07T05:25:45.400Z",
+    "detected_at": "2026-04-07T08:18:26.146Z",
     "first_seen": "2026-04-06T18:37:29.029Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 14000000,
@@ -324,10 +268,10 @@
     "title": "Garden View | Premium Quality | Modern Living",
     "agency": "Homify Properties",
     "portal_url": "https://www.bayut.com/property/details-14256206.html",
-    "detected_at": "2026-04-07T05:25:45.400Z",
+    "detected_at": "2026-04-07T08:18:26.146Z",
     "first_seen": "2026-04-06T18:37:29.029Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 920000,
@@ -352,10 +296,10 @@
     "title": "30/70 Payment Plan | Venice | Studio with Fitted War",
     "agency": "Vantage Capital Re",
     "portal_url": "https://www.bayut.com/property/details-14521191.html",
-    "detected_at": "2026-04-07T05:25:45.401Z",
+    "detected_at": "2026-04-07T08:18:26.146Z",
     "first_seen": "2026-04-06T18:37:29.030Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 699000,
@@ -380,10 +324,10 @@
     "title": "30/70 Payment Plan | Bergamo | 2 Bed + Maid Room + 3",
     "agency": "Vantage Capital Re",
     "portal_url": "https://www.bayut.com/property/details-14520863.html",
-    "detected_at": "2026-04-07T05:25:45.401Z",
+    "detected_at": "2026-04-07T08:18:26.146Z",
     "first_seen": "2026-04-06T18:37:29.030Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 1810000,
@@ -408,10 +352,10 @@
     "title": "Upgraded | Extended | Private Pool",
     "agency": "fäm Properties - B",
     "portal_url": "https://www.bayut.com/property/details-14472116.html",
-    "detected_at": "2026-04-07T05:25:45.401Z",
+    "detected_at": "2026-04-07T08:18:26.147Z",
     "first_seen": "2026-04-06T18:37:29.030Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 8680000,
@@ -436,10 +380,10 @@
     "title": "Extended | Private Pool | Close to Park",
     "agency": "LuxuryX Agents",
     "portal_url": "https://www.bayut.com/property/details-14490343.html",
-    "detected_at": "2026-04-07T05:25:45.401Z",
+    "detected_at": "2026-04-07T08:18:26.147Z",
     "first_seen": "2026-04-06T18:37:29.030Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 8680000,
@@ -464,10 +408,10 @@
     "title": "High ROI | 4% DLD Waver | Limited Units |",
     "agency": "IOD Real Estate",
     "portal_url": "https://www.bayut.com/property/details-14247511.html",
-    "detected_at": "2026-04-07T05:25:45.401Z",
+    "detected_at": "2026-04-07T08:18:26.147Z",
     "first_seen": "2026-04-06T18:37:29.031Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 1000000,
@@ -492,10 +436,10 @@
     "title": "FULL MARINA VIEW | VACANT ON TRANSFER | HIGH ROI",
     "agency": "Banke Internationa",
     "portal_url": "https://www.bayut.com/property/details-14445962.html",
-    "detected_at": "2026-04-07T05:25:45.401Z",
+    "detected_at": "2026-04-07T08:18:26.147Z",
     "first_seen": "2026-04-06T18:37:29.031Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 1250000,
@@ -520,10 +464,10 @@
     "title": "30/70 Payment Plan | Naples | 1 Bed + Fitted Walk in",
     "agency": "Vantage Capital Re",
     "portal_url": "https://www.bayut.com/property/details-14521315.html",
-    "detected_at": "2026-04-07T05:25:45.401Z",
+    "detected_at": "2026-04-07T08:18:26.147Z",
     "first_seen": "2026-04-06T18:37:29.031Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 1070000,
@@ -548,10 +492,10 @@
     "title": "Best Price Burj View | Brand New | Vacant",
     "agency": "White & Co",
     "portal_url": "https://www.bayut.com/property/details-13670943.html",
-    "detected_at": "2026-04-07T05:25:45.402Z",
+    "detected_at": "2026-04-07T08:18:26.147Z",
     "first_seen": "2026-04-06T18:37:29.031Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 5100000,
@@ -576,10 +520,10 @@
     "title": "30/70 Payment Plan | Verona | Junior 2 Bed + 2 Full",
     "agency": "Vantage Capital Re",
     "portal_url": "https://www.bayut.com/property/details-14521851.html",
-    "detected_at": "2026-04-07T05:25:45.402Z",
+    "detected_at": "2026-04-07T08:18:26.147Z",
     "first_seen": "2026-04-06T18:37:29.031Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 1260000,
@@ -604,10 +548,10 @@
     "title": "Premium High Floor | Sea View | Vacant",
     "agency": "Idigov Real Estate",
     "portal_url": "https://www.bayut.com/property/details-14451664.html",
-    "detected_at": "2026-04-07T05:25:45.402Z",
+    "detected_at": "2026-04-07T08:18:26.148Z",
     "first_seen": "2026-04-06T18:37:29.032Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 14900000,
@@ -632,10 +576,10 @@
     "title": "VACANT ON TRANSFER | FULLY FURNISHED | LUXURIOUS",
     "agency": "Elite Venture Prop",
     "portal_url": "https://www.bayut.com/property/details-14488057.html",
-    "detected_at": "2026-04-07T05:25:45.402Z",
+    "detected_at": "2026-04-07T08:18:26.148Z",
     "first_seen": "2026-04-06T18:37:29.032Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 900000,
@@ -660,10 +604,10 @@
     "title": "Brand New and Fully Upgraded Kitchen | Furnished",
     "agency": "Driven Properties",
     "portal_url": "https://www.bayut.com/property/details-12947968.html",
-    "detected_at": "2026-04-07T05:25:45.402Z",
+    "detected_at": "2026-04-07T08:18:26.148Z",
     "first_seen": "2026-04-06T18:37:29.032Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 2400000,
@@ -688,10 +632,10 @@
     "title": "Full Burj Khalifa View | Vacant on Transfer",
     "agency": "Allsopp & Allsopp",
     "portal_url": "https://www.bayut.com/property/details-14382653.html",
-    "detected_at": "2026-04-07T05:25:45.402Z",
+    "detected_at": "2026-04-07T08:18:26.148Z",
     "first_seen": "2026-04-06T18:37:29.033Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 5300000,
@@ -716,10 +660,10 @@
     "title": "Fully Furnished Studio | Smart Layout | High ROI Inv",
     "agency": "Vierra Property",
     "portal_url": "https://www.bayut.com/property/details-14334853.html",
-    "detected_at": "2026-04-07T05:25:45.402Z",
+    "detected_at": "2026-04-07T08:18:26.148Z",
     "first_seen": "2026-04-06T18:37:29.033Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 549000,
@@ -744,42 +688,14 @@
     "title": "High Quality | Large Size | Enquire Today",
     "agency": "Strada Real Estate",
     "portal_url": "https://www.bayut.com/property/details-14612192.html",
-    "detected_at": "2026-04-07T05:25:45.402Z",
+    "detected_at": "2026-04-07T08:18:26.148Z",
     "first_seen": "2026-04-06T18:37:29.033Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 1790000,
         "date": "2026-04-06T18:37:29.033Z"
-      }
-    ]
-  },
-  {
-    "listing_id": "14272603",
-    "area": "Downtown Dubai",
-    "type": "Apartment",
-    "beds": 3,
-    "purpose": "sale",
-    "current_price": 2750000,
-    "previous_price": 3000000,
-    "first_price": 2750000,
-    "drop_from_prev": -8.3,
-    "drop_from_first": 0,
-    "saved_aed": 0,
-    "sqft": 1478,
-    "psf": 1861,
-    "title": "Exclusive | Refurbished Top Floor 3 Bedroom Apartmen",
-    "agency": "Shai Serene Real E",
-    "portal_url": "https://www.bayut.com/property/details-14272603.html",
-    "detected_at": "2026-04-07T05:25:45.402Z",
-    "first_seen": "2026-04-06T23:53:44.288Z",
-    "drop_count": 0,
-    "days_on_market": 0,
-    "price_history": [
-      {
-        "price": 2750000,
-        "date": "2026-04-06T23:53:44.288Z"
       }
     ]
   },
@@ -800,10 +716,10 @@
     "title": "Partial Downtown View I Fully Furnished",
     "agency": "Alhad Real Estate",
     "portal_url": "https://www.bayut.com/property/details-14072787.html",
-    "detected_at": "2026-04-07T05:25:45.403Z",
+    "detected_at": "2026-04-07T08:18:26.148Z",
     "first_seen": "2026-04-06T18:37:29.033Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 1150000,
@@ -828,10 +744,10 @@
     "title": "Studio | Unfurnished | Equipped | Post Handover PP",
     "agency": "Betterhomes - Busi",
     "portal_url": "https://www.bayut.com/property/details-14513520.html",
-    "detected_at": "2026-04-07T05:25:45.403Z",
+    "detected_at": "2026-04-07T08:18:26.148Z",
     "first_seen": "2026-04-06T18:37:29.033Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 520000,
@@ -856,10 +772,10 @@
     "title": "Motivated Seller | Four Bedrooms | Vacant |",
     "agency": "Allsopp & Allsopp",
     "portal_url": "https://www.bayut.com/property/details-14043599.html",
-    "detected_at": "2026-04-07T05:25:45.403Z",
+    "detected_at": "2026-04-07T08:18:26.148Z",
     "first_seen": "2026-04-06T18:37:29.033Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 4350000,
@@ -884,10 +800,10 @@
     "title": "Best location | Large 5 Bedroom Villa | Upgraded",
     "agency": "AEON & Trisl Real",
     "portal_url": "https://www.bayut.com/property/details-13508892.html",
-    "detected_at": "2026-04-07T05:25:45.403Z",
+    "detected_at": "2026-04-07T08:18:26.149Z",
     "first_seen": "2026-04-06T18:37:29.033Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 16000000,
@@ -912,10 +828,10 @@
     "title": "Premium & Exclusive 1 Bed + Private Pool I Designer",
     "agency": "You & House Proper",
     "portal_url": "https://www.bayut.com/property/details-14244281.html",
-    "detected_at": "2026-04-07T05:25:45.403Z",
+    "detected_at": "2026-04-07T08:18:26.149Z",
     "first_seen": "2026-04-06T18:37:29.033Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 1250000,
@@ -940,10 +856,10 @@
     "title": "Premium Renovation | Vacant | Marina View",
     "agency": "AQUA Properties",
     "portal_url": "https://www.bayut.com/property/details-14152796.html",
-    "detected_at": "2026-04-07T05:25:45.403Z",
+    "detected_at": "2026-04-07T08:18:26.149Z",
     "first_seen": "2026-04-06T18:37:29.033Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 2700000,
@@ -968,10 +884,10 @@
     "title": "Upgraded | Vacant | High Floor | Rare Layout",
     "agency": "Gold Mark Real Est",
     "portal_url": "https://www.bayut.com/property/details-14720054.html",
-    "detected_at": "2026-04-07T05:25:45.403Z",
+    "detected_at": "2026-04-07T08:18:26.149Z",
     "first_seen": "2026-04-06T18:37:29.033Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 2700000,
@@ -996,10 +912,10 @@
     "title": "Panoramic Sea Views | Turn-Key Fully Furnished | Vac",
     "agency": "Nova Star Real Est",
     "portal_url": "https://www.bayut.com/property/details-14561195.html",
-    "detected_at": "2026-04-07T05:25:45.404Z",
+    "detected_at": "2026-04-07T08:18:26.149Z",
     "first_seen": "2026-04-06T18:37:29.034Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 9300000,
@@ -1024,10 +940,10 @@
     "title": "High Floor Unit with Burj Khalifa View | 02 Series",
     "agency": "Driven Properties",
     "portal_url": "https://www.bayut.com/property/details-11937563.html",
-    "detected_at": "2026-04-07T05:25:45.404Z",
+    "detected_at": "2026-04-07T08:18:26.149Z",
     "first_seen": "2026-04-06T18:37:29.034Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 8990000,
@@ -1052,10 +968,10 @@
     "title": "Upgraded | Marina View | Rented",
     "agency": "Betterhomes - Duba",
     "portal_url": "https://www.bayut.com/property/details-14627812.html",
-    "detected_at": "2026-04-07T05:25:45.404Z",
+    "detected_at": "2026-04-07T08:18:26.150Z",
     "first_seen": "2026-04-06T18:37:29.034Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 3000000,
@@ -1080,10 +996,10 @@
     "title": "Vacant I Community View I Prime Location",
     "agency": "haus & haus Real E",
     "portal_url": "https://www.bayut.com/property/details-14515882.html",
-    "detected_at": "2026-04-07T05:25:45.404Z",
+    "detected_at": "2026-04-07T08:18:26.150Z",
     "first_seen": "2026-04-06T18:37:29.034Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 1630000,
@@ -1108,10 +1024,10 @@
     "title": "Investor’s Deal | Largest Layout | Vacant | Marina",
     "agency": "Betterhomes - Duba",
     "portal_url": "https://www.bayut.com/property/details-14327440.html",
-    "detected_at": "2026-04-07T05:25:45.404Z",
+    "detected_at": "2026-04-07T08:18:26.150Z",
     "first_seen": "2026-04-06T18:37:29.034Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 2300000,
@@ -1136,10 +1052,10 @@
     "title": "Vacant | Exclusive | Burj Khalifa View",
     "agency": "Houstetic Properti",
     "portal_url": "https://www.bayut.com/property/details-14415109.html",
-    "detected_at": "2026-04-07T05:25:45.405Z",
+    "detected_at": "2026-04-07T08:18:26.150Z",
     "first_seen": "2026-04-06T18:37:29.034Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 2300000,
@@ -1164,10 +1080,10 @@
     "title": "Spacious & Upgraded 2Bed I Premium Quality I Distres",
     "agency": "You & House Proper",
     "portal_url": "https://www.bayut.com/property/details-14608117.html",
-    "detected_at": "2026-04-07T05:25:45.405Z",
+    "detected_at": "2026-04-07T08:18:26.150Z",
     "first_seen": "2026-04-06T18:37:29.034Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 1080000,
@@ -1192,10 +1108,10 @@
     "title": "Spacious 1,677 Sq. Ft | Partial Marina View | Vacant",
     "agency": "Betterhomes - Duba",
     "portal_url": "https://www.bayut.com/property/details-12575288.html",
-    "detected_at": "2026-04-07T05:25:45.405Z",
+    "detected_at": "2026-04-07T08:18:26.150Z",
     "first_seen": "2026-04-06T18:37:29.034Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 2350000,
@@ -1220,10 +1136,10 @@
     "title": "BEST VIEW | LUXURY FURNISHED | BEST LAYOUT",
     "agency": "First Horizon Real",
     "portal_url": "https://www.bayut.com/property/details-13972505.html",
-    "detected_at": "2026-04-07T05:25:45.405Z",
+    "detected_at": "2026-04-07T08:18:26.150Z",
     "first_seen": "2026-04-06T18:37:29.034Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 1400000,
@@ -1248,10 +1164,10 @@
     "title": "High Floor | Well-Maintained 2 BEDROOM | High ROI",
     "agency": "La Capitale Real E",
     "portal_url": "https://www.bayut.com/property/details-14532285.html",
-    "detected_at": "2026-04-07T05:25:45.405Z",
+    "detected_at": "2026-04-07T08:18:26.150Z",
     "first_seen": "2026-04-06T18:37:29.034Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 1980000,
@@ -1276,10 +1192,10 @@
     "title": "Pool view | Vacant now | Spacious layout",
     "agency": "haus & haus Real E",
     "portal_url": "https://www.bayut.com/property/details-14356014.html",
-    "detected_at": "2026-04-07T05:25:45.405Z",
+    "detected_at": "2026-04-07T08:18:26.151Z",
     "first_seen": "2026-04-06T18:37:29.035Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 1300000,
@@ -1304,14 +1220,42 @@
     "title": "Armani Residence | Furnished | Serviced | Branded",
     "agency": "fäm Properties - B",
     "portal_url": "https://www.bayut.com/property/details-14378197.html",
-    "detected_at": "2026-04-07T05:25:45.405Z",
+    "detected_at": "2026-04-07T08:18:26.151Z",
     "first_seen": "2026-04-06T18:37:29.035Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 3200000,
         "date": "2026-04-06T18:37:29.035Z"
+      }
+    ]
+  },
+  {
+    "listing_id": "13495474",
+    "area": "Dubai Marina",
+    "type": "Apartment",
+    "beds": 1,
+    "purpose": "sale",
+    "current_price": 1700000,
+    "previous_price": 1800000,
+    "first_price": 1700000,
+    "drop_from_prev": -5.6,
+    "drop_from_first": 0,
+    "saved_aed": 0,
+    "sqft": 759,
+    "psf": 2240,
+    "title": "Rare Layout | Full Marina Views | VOT",
+    "agency": "White & Co",
+    "portal_url": "https://www.bayut.com/property/details-13495474.html",
+    "detected_at": "2026-04-07T08:18:26.151Z",
+    "first_seen": "2026-04-07T08:18:26.151Z",
+    "drop_count": 0,
+    "days_on_market": 0,
+    "price_history": [
+      {
+        "price": 1700000,
+        "date": "2026-04-07T08:18:26.151Z"
       }
     ]
   },
@@ -1332,7 +1276,7 @@
     "title": "Full Upgrades | Marina Views | VOT",
     "agency": "Cresco Real Estate",
     "portal_url": "https://www.bayut.com/property/details-14679928.html",
-    "detected_at": "2026-04-07T05:25:45.405Z",
+    "detected_at": "2026-04-07T08:18:26.151Z",
     "first_seen": "2026-04-06T23:53:54.198Z",
     "drop_count": 0,
     "days_on_market": 0,
@@ -1360,7 +1304,7 @@
     "title": "Premium 3 BR Layout | Amazing Burj Views",
     "agency": "AQUA Properties",
     "portal_url": "https://www.bayut.com/property/details-14624062.html",
-    "detected_at": "2026-04-07T05:25:45.405Z",
+    "detected_at": "2026-04-07T08:18:26.151Z",
     "first_seen": "2026-04-06T23:53:53.387Z",
     "drop_count": 0,
     "days_on_market": 0,
@@ -1388,10 +1332,10 @@
     "title": "Burj View | Dubai Mall Access | Motivated Seller",
     "agency": "White & Co",
     "portal_url": "https://www.bayut.com/property/details-14365967.html",
-    "detected_at": "2026-04-07T05:25:45.405Z",
+    "detected_at": "2026-04-07T08:18:26.151Z",
     "first_seen": "2026-04-06T18:37:29.035Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 5150000,
@@ -1416,7 +1360,7 @@
     "title": "MARINA VIEW | UPGRADED | WITH BALCONY",
     "agency": "Chelsea Properties",
     "portal_url": "https://www.bayut.com/property/details-14626770.html",
-    "detected_at": "2026-04-07T05:25:45.406Z",
+    "detected_at": "2026-04-07T08:18:26.151Z",
     "first_seen": "2026-04-07T05:25:45.406Z",
     "drop_count": 0,
     "days_on_market": 0,
@@ -1444,10 +1388,10 @@
     "title": "Distress Deal EMAAR | Motivated Seller | Off-Plan 2B",
     "agency": "Rawlins Properties",
     "portal_url": "https://www.bayut.com/property/details-14246550.html",
-    "detected_at": "2026-04-07T05:25:45.406Z",
+    "detected_at": "2026-04-07T08:18:26.151Z",
     "first_seen": "2026-04-06T18:37:29.035Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 2200000,
@@ -1472,10 +1416,10 @@
     "title": "Exclusive | Vacant | Motivated Seller | Prime Locati",
     "agency": "Gia & Co Real Esta",
     "portal_url": "https://www.bayut.com/property/details-14432597.html",
-    "detected_at": "2026-04-07T05:25:45.406Z",
+    "detected_at": "2026-04-07T08:18:26.151Z",
     "first_seen": "2026-04-06T18:37:29.035Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 1750000,
@@ -1500,10 +1444,10 @@
     "title": "Vacating soon! Terrace Unit |Rare & Unique Flat",
     "agency": "Blue Hills Real Es",
     "portal_url": "https://www.bayut.com/property/details-11942183.html",
-    "detected_at": "2026-04-07T05:25:45.406Z",
+    "detected_at": "2026-04-07T08:18:26.151Z",
     "first_seen": "2026-04-06T18:37:29.035Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 2460000,
@@ -1528,10 +1472,10 @@
     "title": "Full Fountain View | Luxurious | Vacant | Big Size",
     "agency": "D AND B Properties",
     "portal_url": "https://www.bayut.com/property/details-14462379.html",
-    "detected_at": "2026-04-07T05:25:45.406Z",
+    "detected_at": "2026-04-07T08:18:26.151Z",
     "first_seen": "2026-04-06T18:37:29.035Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 7400000,
@@ -1556,10 +1500,10 @@
     "title": "Exclusive|Largest Layout|Fully Furnished",
     "agency": "Golden Wave Proper",
     "portal_url": "https://www.bayut.com/property/details-14684440.html",
-    "detected_at": "2026-04-07T05:25:45.406Z",
+    "detected_at": "2026-04-07T08:18:26.151Z",
     "first_seen": "2026-04-06T18:37:29.035Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 1850000,
@@ -1584,10 +1528,10 @@
     "title": "Emirates Golf Course View | Prime Location",
     "agency": "fäm Properties - B",
     "portal_url": "https://www.bayut.com/property/details-14467085.html",
-    "detected_at": "2026-04-07T05:25:45.406Z",
+    "detected_at": "2026-04-07T08:18:26.152Z",
     "first_seen": "2026-04-06T18:37:29.035Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 1900000,
@@ -1612,10 +1556,10 @@
     "title": "Chiller Free | Furnished | Full Sea View",
     "agency": "Dacha Real Estate",
     "portal_url": "https://www.bayut.com/property/details-14626026.html",
-    "detected_at": "2026-04-07T05:25:45.406Z",
+    "detected_at": "2026-04-07T08:18:26.152Z",
     "first_seen": "2026-04-06T18:37:29.035Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 3800000,
@@ -1640,10 +1584,10 @@
     "title": "Burj View | Luxury Living | Hotel Apartment",
     "agency": "White & Co",
     "portal_url": "https://www.bayut.com/property/details-14259970.html",
-    "detected_at": "2026-04-07T05:25:49.630Z",
+    "detected_at": "2026-04-07T08:18:30.658Z",
     "first_seen": "2026-04-06T18:37:32.699Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 250000,
@@ -1668,10 +1612,10 @@
     "title": "Fully Furnished | Bills Included | Burj View",
     "agency": "Tyron Ash Internat",
     "portal_url": "https://www.bayut.com/property/details-14475864.html",
-    "detected_at": "2026-04-07T05:25:49.630Z",
+    "detected_at": "2026-04-07T08:18:30.659Z",
     "first_seen": "2026-04-06T18:37:32.699Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 137000,
@@ -1696,10 +1640,10 @@
     "title": "Fully Furnished / High Floor / Vacant",
     "agency": "Mab Develop Projec",
     "portal_url": "https://www.bayut.com/property/details-14464970.html",
-    "detected_at": "2026-04-07T05:25:49.630Z",
+    "detected_at": "2026-04-07T08:18:30.659Z",
     "first_seen": "2026-04-06T18:37:32.699Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 160000,
@@ -1724,10 +1668,10 @@
     "title": "Daniels Fully Renovated 3BR + 1 Maids Room | Princes",
     "agency": "Daniels Luxury Hol",
     "portal_url": "https://www.bayut.com/property/details-11301652.html",
-    "detected_at": "2026-04-07T05:25:49.630Z",
+    "detected_at": "2026-04-07T08:18:30.659Z",
     "first_seen": "2026-04-06T18:37:32.699Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 320000,
@@ -1752,10 +1696,10 @@
     "title": "Corner Villa | Large Plot | Greenbelt Backing",
     "agency": "Huspy Dubai",
     "portal_url": "https://www.bayut.com/property/details-14442632.html",
-    "detected_at": "2026-04-07T05:25:49.630Z",
+    "detected_at": "2026-04-07T08:18:30.659Z",
     "first_seen": "2026-04-06T18:37:32.699Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 400000,
@@ -1780,10 +1724,10 @@
     "title": "Community View | Fully Furnished | Chiller Free",
     "agency": "Dacha Real Estate",
     "portal_url": "https://www.bayut.com/property/details-14342924.html",
-    "detected_at": "2026-04-07T05:25:49.630Z",
+    "detected_at": "2026-04-07T08:18:30.659Z",
     "first_seen": "2026-04-06T18:37:32.699Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 140000,
@@ -1808,10 +1752,10 @@
     "title": "Boulevard View | 2BR Apartment | Forte 1 Downtown",
     "agency": "H & S Real Estate",
     "portal_url": "https://www.bayut.com/property/details-14471408.html",
-    "detected_at": "2026-04-07T05:25:49.630Z",
+    "detected_at": "2026-04-07T08:18:30.659Z",
     "first_seen": "2026-04-06T18:37:32.699Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 150000,
@@ -1836,10 +1780,10 @@
     "title": "Largest Layout | Prime Location | Fully Furnished",
     "agency": "haus & haus Real E",
     "portal_url": "https://www.bayut.com/property/details-14418555.html",
-    "detected_at": "2026-04-07T05:25:49.631Z",
+    "detected_at": "2026-04-07T08:18:30.659Z",
     "first_seen": "2026-04-06T18:37:32.699Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 105000,
@@ -1864,10 +1808,10 @@
     "title": "Unfurnished | Chiller Free | Sea View",
     "agency": "Betterhomes - Duba",
     "portal_url": "https://www.bayut.com/property/details-14343133.html",
-    "detected_at": "2026-04-07T05:25:49.631Z",
+    "detected_at": "2026-04-07T08:18:30.659Z",
     "first_seen": "2026-04-06T18:37:32.699Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 165000,
@@ -1892,10 +1836,10 @@
     "title": "Multiple Cheques | Boulevard View | Chiller Free",
     "agency": "fäm Properties - B",
     "portal_url": "https://www.bayut.com/property/details-14464250.html",
-    "detected_at": "2026-04-07T05:25:49.631Z",
+    "detected_at": "2026-04-07T08:18:30.659Z",
     "first_seen": "2026-04-06T18:37:32.699Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 162000,
@@ -1920,10 +1864,10 @@
     "title": "Luxury High - Floor 2BR l Fully Furnished l Ready",
     "agency": "Hamptons Internati",
     "portal_url": "https://www.bayut.com/property/details-14051117.html",
-    "detected_at": "2026-04-07T05:25:49.631Z",
+    "detected_at": "2026-04-07T08:18:30.659Z",
     "first_seen": "2026-04-06T18:37:32.699Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 260000,
@@ -1948,10 +1892,10 @@
     "title": "Unfurnished | High Floor Unit | Prime Location",
     "agency": "Expert Homes Real",
     "portal_url": "https://www.bayut.com/property/details-14224350.html",
-    "detected_at": "2026-04-07T05:25:49.631Z",
+    "detected_at": "2026-04-07T08:18:30.659Z",
     "first_seen": "2026-04-06T18:37:32.700Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 130000,
@@ -1976,10 +1920,10 @@
     "title": "Marina View| Next To Metro| Brand New Building",
     "agency": "M T S Real Estate",
     "portal_url": "https://www.bayut.com/property/details-14406169.html",
-    "detected_at": "2026-04-07T05:25:49.631Z",
+    "detected_at": "2026-04-07T08:18:30.659Z",
     "first_seen": "2026-04-06T18:37:32.700Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 140000,
@@ -2004,10 +1948,10 @@
     "title": "Burj Khalifa View | Low Floor | Vacant End of Feb",
     "agency": "Mon Maison Interna",
     "portal_url": "https://www.bayut.com/property/details-14267141.html",
-    "detected_at": "2026-04-07T05:25:49.631Z",
+    "detected_at": "2026-04-07T08:18:30.659Z",
     "first_seen": "2026-04-06T18:37:32.700Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 310000,
@@ -2032,10 +1976,10 @@
     "title": "EXCLUSIVE | Fully Furnished | Ready To Move in",
     "agency": "Engel & Voelkers D",
     "portal_url": "https://www.bayut.com/property/details-14180777.html",
-    "detected_at": "2026-04-07T05:25:49.631Z",
+    "detected_at": "2026-04-07T08:18:30.659Z",
     "first_seen": "2026-04-06T18:37:32.700Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 108000,
@@ -2060,10 +2004,10 @@
     "title": "Large 2BR| Prime Downtown Location | Stunning Amenit",
     "agency": "Tuanam Real Estate",
     "portal_url": "https://www.bayut.com/property/details-14491750.html",
-    "detected_at": "2026-04-07T05:25:49.631Z",
+    "detected_at": "2026-04-07T08:18:30.659Z",
     "first_seen": "2026-04-06T18:37:32.700Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 160000,
@@ -2088,10 +2032,10 @@
     "title": "One Bedroom | Vacant | Luxury Jumeirah Living",
     "agency": "Allsopp & Allsopp",
     "portal_url": "https://www.bayut.com/property/details-14418683.html",
-    "detected_at": "2026-04-07T05:25:49.631Z",
+    "detected_at": "2026-04-07T08:18:30.659Z",
     "first_seen": "2026-04-06T18:37:32.700Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 170000,
@@ -2116,10 +2060,10 @@
     "title": "First Week March I Partial Sea View I Spacious",
     "agency": "Propfolio Real Est",
     "portal_url": "https://www.bayut.com/property/details-13933206.html",
-    "detected_at": "2026-04-07T05:25:49.631Z",
+    "detected_at": "2026-04-07T08:18:30.659Z",
     "first_seen": "2026-04-06T18:37:32.700Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 85000,
@@ -2144,10 +2088,10 @@
     "title": "Fully Upgraded Studio | Furnished | Marina View",
     "agency": "Square Assets Real",
     "portal_url": "https://www.bayut.com/property/details-14436950.html",
-    "detected_at": "2026-04-07T05:25:49.631Z",
+    "detected_at": "2026-04-07T08:18:30.660Z",
     "first_seen": "2026-04-06T18:37:32.700Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 85000,
@@ -2172,10 +2116,10 @@
     "title": "High floor | Upgraded | Unfurnished | Marina view",
     "agency": "Betterhomes - Duba",
     "portal_url": "https://www.bayut.com/property/details-14351851.html",
-    "detected_at": "2026-04-07T05:25:49.631Z",
+    "detected_at": "2026-04-07T08:18:30.660Z",
     "first_seen": "2026-04-06T18:37:32.700Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 270000,
@@ -2200,10 +2144,10 @@
     "title": "Balcony | Unfurnished | Spacious Living Room",
     "agency": "Windsor E S T Esta",
     "portal_url": "https://www.bayut.com/property/details-14376703.html",
-    "detected_at": "2026-04-07T05:25:49.631Z",
+    "detected_at": "2026-04-07T08:18:30.660Z",
     "first_seen": "2026-04-06T18:37:32.700Z",
     "drop_count": 0,
-    "days_on_market": 0,
+    "days_on_market": 1,
     "price_history": [
       {
         "price": 190000,
