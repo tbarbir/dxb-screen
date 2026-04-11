@@ -880,15 +880,20 @@ const pc  = n => n!=null?n.toFixed(1)+'%':'—';
 const bl  = b => b===0?'Studio':b?b+'BR':'—';
 
 function getYield(area, type, beds) {
+  // Use live benchmarks if available (Goldman-confirmed yields)
+  if (LIVE_BENCHMARKS?.yields) {
+    return getLiveYield(area, type, beds);
+  }
   const base = YIELDS[area]?.[type]?.[beds] || YIELDS[area]?.[type]?.[1]
     || (type==='Villa'?.050:type==='Townhouse'?.060:.055);
   return base * (MARKET_PARAMS[CURRENT_MARKET]?.rentHaircut || 1.0);
 }
 function getDLDNAV(area, type, beds, sqft) {
-  const areaPSF = DLD_SQFT[area];
+  const areaPSF = getLivePSF(area) || DLD_SQFT[area];
   if (areaPSF && sqft) {
     const nav = Math.round(areaPSF * (PSF_TYPE_MOD[type]||1.0) * sqft / 100000) * 100000;
-    return { nav, method:'PSF×sqft', confidence:'HIGH' };
+    const conf = LIVE_BENCHMARKS?.psf?.[area] ? 'LIVE' : (DLD_SQFT[area] ? 'HIGH' : 'MEDIUM');
+    return { nav, method:'PSF×sqft', confidence: conf };
   }
   const fp = FALLBACK_PRICE[area]?.[type]?.[beds] || FALLBACK_PRICE[area]?.[type]?.[1];
   if (fp) return { nav: fp, method:'Avg transaction', confidence:'MEDIUM' };
@@ -1011,9 +1016,51 @@ function enrich(s) {
 
 
 /* ══ LIVE DATA FETCH ═══════════════════════════════════════════════════════ */
+function makeSignal(ms) {
+  const ctrl = new AbortController();
+  setTimeout(() => ctrl.abort(), ms);
+  return ctrl.signal;
+}
+
+// Live benchmarks loaded from GitHub (updated weekly by scraper)
+let LIVE_BENCHMARKS = null;
+
+async function loadBenchmarks() {
+  try {
+    const url = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/data/benchmarks.json?t=${Date.now()}`;
+    const resp = await fetch(url, { signal: makeSignal(8000) });
+    if (!resp.ok) return;
+    LIVE_BENCHMARKS = await resp.json();
+    log(`✓ Live benchmarks loaded (${LIVE_BENCHMARKS.adjSource}) factor=${LIVE_BENCHMARKS.adjFactor}`, 'ok');
+  } catch(e) {
+    log(`Benchmarks fallback to hardcoded (${e.message})`, 'warn');
+  }
+}
+
+// Override getDLDNAV to use live benchmarks when available
+function getLivePSF(area) {
+  if (LIVE_BENCHMARKS?.psf?.[area]) return LIVE_BENCHMARKS.psf[area];
+  return DLD_SQFT[area] || null;
+}
+
+function getLiveYield(area, type, beds) {
+  if (LIVE_BENCHMARKS?.yields) {
+    const cat = (type === 'Villa' || type === 'Townhouse') ? 'villa' : 'apartment';
+    const y = LIVE_BENCHMARKS.yields[cat]?.[area] || LIVE_BENCHMARKS.yields[cat]?.['_default'];
+    if (y) {
+      const vac = MARKET_PARAMS[CURRENT_MARKET]?.rentHaircut || 1.0;
+      return y * vac;
+    }
+  }
+  return getYield(area, type, beds);
+}
+
 async function fetchGitHub() {
+  // Load benchmarks in parallel
+  await loadBenchmarks();
+
   const url = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/data/listings.json?t=${Date.now()}`;
-  const resp = await fetch(url, { signal: AbortSignal.timeout(12000) });
+  const resp = await fetch(url, { signal: makeSignal(12000) });
   if (!resp.ok) throw new Error(`GitHub ${resp.status}`);
   const drops = await resp.json();
   if (!Array.isArray(drops) || !drops.length) throw new Error('Empty listings.json');
@@ -1032,7 +1079,7 @@ async function fetchGitHub() {
 
 async function fetchPanicSelling() {
   const url = 'https://api.allorigins.win/get?url=' + encodeURIComponent('https://panicselling.com/list/?purpose=for-sale&sort=drop');
-  const resp = await fetch(url, { signal: AbortSignal.timeout(20000) });
+  const resp = await fetch(url, { signal: makeSignal(20000) });
   if (!resp.ok) throw new Error(`allorigins ${resp.status}`);
   const data = await resp.json();
   const html = data.contents || '';
