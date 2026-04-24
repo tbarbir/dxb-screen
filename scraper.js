@@ -769,10 +769,14 @@ async function main() {
       l.price_history   = [{ price: l.current_price, date: l.detected_at }];
     }
     snapshot.push(l);
-   drops.push(l); // All PanicSelling listings are already drops — include all
+    // All PanicSelling listings are price-dropped by definition
+    // Include all — use drop_from_prev as primary signal
+    if (l.drop_from_prev < 0 || l.drop_from_first < 0) drops.push(l);
+    else if (l.drop_from_prev < 0) drops.push(l);
+    else drops.push(l); // include anyway — PanicSelling only shows drops
   }
 
-  drops.sort((a, b) => a.drop_from_first - b.drop_from_first);
+  drops.sort((a, b) => (a.drop_from_prev||0) - (b.drop_from_prev||0));
 
   const stats = {
     runAt, isFirstRun,
