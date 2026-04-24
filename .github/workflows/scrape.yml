@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Install dependencies
         run: npm install
@@ -31,11 +31,15 @@ jobs:
         run: node scraper.js
         env:
           CI: true
+          DDA_APP_ID: ${{ secrets.DDA_APP_ID }}
+          DDA_SECURITY_ID: ${{ secrets.DDA_SECURITY_ID }}
+          DDA_CLIENT_ID: ${{ secrets.DDA_CLIENT_ID }}
+          DDA_CLIENT_SECRET: ${{ secrets.DDA_CLIENT_SECRET }}
 
       - name: Commit updated data
         run: |
           git config user.name  "GPI Scraper Bot"
           git config user.email "bot@gulf-price-intelligence.local"
-          git add data/listings.json data/drops.json data/stats.json
+          git add data/listings.json data/drops.json data/stats.json data/benchmarks.json
           git diff --staged --quiet || git commit -m "scrape: $(date -u '+%Y-%m-%d %H:%M UTC')"
           git push
