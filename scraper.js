@@ -420,10 +420,105 @@ function calcAreaPSF(transactions) {
   return Math.round(psfs.length % 2 ? psfs[mid] : (psfs[mid-1]+psfs[mid])/2);
 }
 
+const TRANSACTIONS_FILE = path.join(DATA_DIR, 'transactions.json');
+
+// ── helpers ──────────────────────────────────────────────────────────────────
+function getField(t, ...keys) {
+  for (const k of keys) { if (t[k] !== undefined && t[k] !== null) return t[k]; }
+  return null;
+}
+function txnPrice(t)  { return parseFloat(getField(t,'trans_value','amount','actual_worth','price') || 0); }
+function txnArea(t)   { return parseFloat(getField(t,'procedure_area','area_sqft','property_size','size') || 0); }
+function txnDate(t)   { return getField(t,'trans_date','transaction_date','date','issue_date') || ''; }
+function txnBeds(t)   { const r=getField(t,'rooms_en','bedrooms','beds','rooms'); return r?String(r):''; }
+function txnType(t)   { return (getField(t,'prop_type_en','property_type','type') || '').toLowerCase(); }
+function txnGroup(t)  { return (getField(t,'trans_group_en','transaction_group','reg_type_en','payment_type') || '').toLowerCase(); }
+function txnProject(t){ return getField(t,'project_name_en','project_name','building','building_name') || ''; }
+function txnDev(t)    { return getField(t,'developer_en','developer_name','developer') || ''; }
+function txnStatus(t) { return (getField(t,'is_offplan','offplan','trans_group_en','registration_type') || '').toLowerCase(); }
+
+function calcStats(txns) {
+  if (!txns.length) return null;
+  const valid = txns.filter(t => txnPrice(t) > 50000 && txnArea(t) > 50);
+  if (!valid.length) return null;
+
+  // PSF
+  const psfs = valid.map(t => txnPrice(t)/txnArea(t)).filter(p => p > 200 && p < 20000).sort((a,b)=>a-b);
+  const mid  = Math.floor(psfs.length/2);
+  const psf  = psfs.length ? Math.round(psfs.length%2 ? psfs[mid] : (psfs[mid-1]+psfs[mid])/2) : null;
+
+  // Avg price
+  const avgPrice = Math.round(valid.reduce((s,t)=>s+txnPrice(t),0)/valid.length);
+
+  // Mortgage vs cash
+  const mortgageCount = valid.filter(t => txnGroup(t).includes('mortgage')).length;
+  const cashPct = Math.round((1 - mortgageCount/valid.length)*100);
+
+  // Off-plan vs secondary
+  const offplanCount = valid.filter(t => {
+    const s = txnStatus(t);
+    return s.includes('off') || s.includes('plan') || s.includes('oqood') || s.includes('primary');
+  }).length;
+  const secondaryPct = Math.round((1 - offplanCount/valid.length)*100);
+
+  // Top developers
+  const devMap = {};
+  valid.forEach(t => {
+    const d = txnDev(t);
+    if (d && d.length > 1) devMap[d] = (devMap[d]||0) + 1;
+  });
+  const topDevs = Object.entries(devMap).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([d])=>d);
+
+  // PSF by type
+  const aptPSFs = valid.filter(t=>txnType(t).includes('apartment')||txnType(t).includes('flat'))
+    .map(t=>txnPrice(t)/txnArea(t)).filter(p=>p>200&&p<20000).sort((a,b)=>a-b);
+  const vilPSFs = valid.filter(t=>txnType(t).includes('villa')||txnType(t).includes('townhouse'))
+    .map(t=>txnPrice(t)/txnArea(t)).filter(p=>p>200&&p<20000).sort((a,b)=>a-b);
+  const aptMid  = Math.floor(aptPSFs.length/2);
+  const vilMid  = Math.floor(vilPSFs.length/2);
+  const aptPSF  = aptPSFs.length ? Math.round(aptPSFs.length%2?aptPSFs[aptMid]:(aptPSFs[aptMid-1]+aptPSFs[aptMid])/2) : null;
+  const vilPSF  = vilPSFs.length ? Math.round(vilPSFs.length%2?vilPSFs[vilMid]:(vilPSFs[vilMid-1]+vilPSFs[vilMid])/2) : null;
+
+  return { count:valid.length, psf, aptPSF, vilPSF, avgPrice, cashPct, secondaryPct, topDevs };
+}
+
+function calcVelocity(curr, prev) {
+  if (!curr || !prev || !prev.count) return null;
+  return +((curr.count - prev.count) / prev.count * 100).toFixed(1);
+}
+
+function calcPriceChange(curr, prev) {
+  if (!curr?.psf || !prev?.psf) return null;
+  return +((curr.psf - prev.psf) / prev.psf * 100).toFixed(1);
+}
+
+// Build comparable transactions for dashboard
+function buildComparables(areaName, txns) {
+  const comps = [];
+  const valid = txns.filter(t => txnPrice(t) > 50000 && txnArea(t) > 50);
+  // Sort by date descending, take last 50 per area
+  valid.sort((a,b) => new Date(txnDate(b)) - new Date(txnDate(a)));
+  valid.slice(0,50).forEach(t => {
+    const price = txnPrice(t);
+    const sqft  = txnArea(t);
+    comps.push({
+      area:    areaName,
+      project: txnProject(t),
+      beds:    txnBeds(t),
+      type:    txnType(t),
+      price:   Math.round(price),
+      sqft:    Math.round(sqft),
+      psf:     sqft > 0 ? Math.round(price/sqft) : null,
+      date:    txnDate(t),
+      group:   txnGroup(t),
+    });
+  });
+  return comps;
+}
+
 async function updateBenchmarks() {
   log('\n-- BENCHMARK UPDATE (DLD API) --');
 
-  // Check if update needed (weekly)
   let existing = null;
   if (fs.existsSync(BENCHMARKS_FILE)) {
     try { existing = JSON.parse(fs.readFileSync(BENCHMARKS_FILE, 'utf8')); } catch(e) {}
@@ -436,48 +531,78 @@ async function updateBenchmarks() {
     }
   }
 
-  // Check credentials
   if (!DDA_CLIENT_ID || !DDA_CLIENT_SECRET) {
-    log('  No DLD credentials — using fallback benchmarks');
-    _writeFallbackBenchmarks();
-    return;
+    log('  No DLD credentials — using fallback');
+    _writeFallbackBenchmarks(); return;
   }
 
-  // Get auth token
   const token = await getDLDToken();
   if (!token) {
-    log('  Auth failed — using fallback benchmarks');
-    _writeFallbackBenchmarks();
-    return;
+    log('  Auth failed — using fallback');
+    _writeFallbackBenchmarks(); return;
   }
 
-  // Fetch PSF for top 20 areas (most impactful for NAV accuracy)
   const TOP_AREAS = [
     'Downtown Dubai','Dubai Marina','Palm Jumeirah','Business Bay',
     'Jumeirah Village Circle','Jumeirah Beach Residence','Dubai Hills Estate',
-    'Arabian Ranches','The Springs','The Meadows',
+    'Arabian Ranches','The Springs','The Meadows','DIFC','Emaar Beachfront',
+    'Jumeirah Lake Towers','Damac Hills','Meydan','Al Barsha',
+    'Mohammed Bin Rashid City','Dubai Creek Harbour','Dubai Harbour','The Valley',
+    'Damac Lagoons','Arabian Ranches 3','Dubai South','Tilal Al Ghaf',
   ];
 
-  const livePSF = { ...BASE_PSF }; // start with base, override with live
-  let successCount = 0;
+  const livePSF      = { ...BASE_PSF };
+  const areaStats    = {};
+  const allComparables = [];
+  let   successCount = 0;
 
-  log(`  Fetching PSF for ${TOP_AREAS.length} areas...`);
+  log(`  Fetching DLD data for ${TOP_AREAS.length} areas (curr + prior 90d)...`);
+
   for (const area of TOP_AREAS) {
     const dldName = AREA_DLD_MAP[area];
-    if (!dldName) continue;
+    if (!dldName) { log(`  ~ ${area}: no DLD mapping`); continue; }
     try {
-      const txns = await fetchDLDTransactions(token, dldName, 3);
-      if (txns.length >= 5) { // need at least 5 transactions for reliable median
-        const psf = calcAreaPSF(txns);
-        if (psf && psf > 500 && psf < 15000) {
-          livePSF[area] = psf;
+      // Current 90 days
+      const currTxns = await fetchDLDTransactions(token, dldName, 3);
+      await sleep(300);
+      // Prior 90 days (days 90-180 ago) for velocity
+      const prevTxns = await fetchDLDTransactions(token, dldName, 6);
+      await sleep(300);
+
+      const currStats = calcStats(currTxns);
+      // prevTxns contains 180d — approximate prior period as 180d minus 90d
+      const prevOnly  = prevTxns.filter(t => {
+        const d = new Date(txnDate(t));
+        const daysAgo = (Date.now() - d) / 86400000;
+        return daysAgo > 90 && daysAgo <= 180;
+      });
+      const prevStats = calcStats(prevOnly);
+
+      if (currStats) {
+        // Update live PSF
+        if (currStats.psf && currStats.psf > 500 && currStats.psf < 15000) {
+          livePSF[area] = currStats.psf;
           successCount++;
-          log(`  ✓ ${area}: AED ${psf}/sqft (${txns.length} txns)`);
-        } else {
-          log(`  ~ ${area}: PSF out of range (${psf}) — using base`);
         }
+        if (currStats.aptPSF) livePSF[area + '_apt'] = currStats.aptPSF;
+        if (currStats.vilPSF) livePSF[area + '_vil'] = currStats.vilPSF;
+
+        // Area stats for dashboard
+        areaStats[area] = {
+          ...currStats,
+          velocity:    calcVelocity(currStats, prevStats),
+          priceChange: calcPriceChange(currStats, prevStats),
+          prevCount:   prevStats?.count || 0,
+          prevPSF:     prevStats?.psf   || null,
+        };
+
+        // Build comparables
+        const comps = buildComparables(area, currTxns);
+        allComparables.push(...comps);
+
+        log(`  ✓ ${area}: PSF ${currStats.psf||'N/A'} | ${currStats.count} txns | vel ${areaStats[area].velocity||'N/A'}% | cash ${currStats.cashPct}% | sec ${currStats.secondaryPct}%`);
       } else {
-        log(`  ~ ${area}: only ${txns.length} txns — using base`);
+        log(`  ~ ${area}: no valid transactions`);
       }
     } catch(e) {
       log(`  ✗ ${area}: ${e.message}`);
@@ -485,41 +610,52 @@ async function updateBenchmarks() {
     await sleep(200);
   }
 
-  log(`\n  DLD API: ${successCount}/${TOP_AREAS.length} areas updated with live data`);
+  log(`\n  DLD: ${successCount}/${TOP_AREAS.length} areas with live PSF`);
+  log(`  Comparables: ${allComparables.length} recent transactions saved`);
 
+  // Write benchmarks.json
   const benchmarks = {
     updatedAt:    new Date().toISOString(),
     source:       successCount > 0 ? 'DLD_API_LIVE' : 'FALLBACK',
     areasUpdated: successCount,
     psf:          livePSF,
     yields:       BASE_YIELDS,
+    areaStats,    // velocity, volume, cash%, offplan%, devs
     notes: {
-      base:       'Feb 2026 E&V/DXB Analytics',
-      live:       `${successCount} areas updated from DLD completed transactions (last 3 months)`,
-      apartments: 'Gross yield 7.1% market avg (Goldman Sachs Feb 2026)',
-      villas:     'Gross yield 4.6% market avg (Goldman Sachs Feb 2026)',
+      base:       'Feb 2026 E&V/DXB Analytics (fallback)',
+      live:       `${successCount} areas updated from DLD completed transactions (last 90 days)`,
+      apartments: 'Gross yield 7.1% mkt avg (Goldman Feb 2026)',
+      villas:     'Gross yield 4.6% mkt avg (Goldman Feb 2026)',
     },
   };
-
   fs.writeFileSync(BENCHMARKS_FILE, JSON.stringify(benchmarks, null, 2));
-  log(`  Benchmarks saved ✓ — ${successCount} live areas, ${Object.keys(livePSF).length - successCount} fallback`);
+
+  // Write transactions.json (comparables lookup for dashboard)
+  fs.writeFileSync(TRANSACTIONS_FILE, JSON.stringify({
+    updatedAt: new Date().toISOString(),
+    count:     allComparables.length,
+    data:      allComparables,
+  }, null, 2));
+
+  log(`  Files saved: benchmarks.json + transactions.json ✓`);
 }
 
 function _writeFallbackBenchmarks() {
-  // Write base benchmarks with monthly drift applied
   const monthsSince = Math.max(0, (Date.now() - new Date('2026-02-01')) / (30*86400000));
   const adj = Math.pow(1.007, monthsSince);
   const psf = {};
-  Object.entries(BASE_PSF).forEach(([a, v]) => { psf[a] = Math.round(v * adj); });
+  Object.entries(BASE_PSF).forEach(([a,v]) => { psf[a] = Math.round(v*adj); });
   fs.writeFileSync(BENCHMARKS_FILE, JSON.stringify({
     updatedAt: new Date().toISOString(),
     source: 'FALLBACK_DRIFT',
     adjFactor: +adj.toFixed(4),
-    psf, yields: BASE_YIELDS,
-    notes: { base: 'Feb 2026 + 0.7% mom drift (Goldman/REIDIN)' },
+    psf, yields: BASE_YIELDS, areaStats: {},
+    notes: { base: 'Feb 2026 + 0.7% mom drift' },
   }, null, 2));
   log(`  Fallback benchmarks written (adj ${adj.toFixed(4)}x)`);
 }
+
+
 
 
 
