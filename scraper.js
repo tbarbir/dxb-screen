@@ -314,40 +314,50 @@ const AREA_DLD_MAP = {
 };
 
 async function getDLDToken() {
-  // Exact endpoints from ICD doc: {baseURL}/secure/sdg/ssis/gatewayoauthtoken/1.0.0/getAccessToken
+  // Exact endpoints from ICD doc
   const endpoints = [
     'https://stg-apis.data.dubai/secure/sdg/ssis/gatewayoauthtoken/1.0.0/getAccessToken',
     'https://apis.data.dubai/secure/sdg/ssis/gatewayoauthtoken/1.0.0/getAccessToken',
   ];
-  // Request format: JSON body (not form-encoded) per ICD doc
-  const body = {
+  const body = JSON.stringify({
     grant_type:    'client_credentials',
     client_id:     DDA_CLIENT_ID,
     client_secret: DDA_CLIENT_SECRET,
+  });
+  const headers = {
+    'Content-Type':                        'application/json',
+    'x-DDA-SecurityApplicationIdentifier': DDA_SECURITY_ID,
   };
+
   for (const endpoint of endpoints) {
+    // Try direct first
     try {
-      log(`  Trying: ${endpoint.split('/')[2]}`);
-      const resp = await axios.post(endpoint, body, {
-        headers: {
-          'Content-Type':                        'application/json',
-          'x-DDA-SecurityApplicationIdentifier': DDA_SECURITY_ID,
-        },
-        timeout: 12000,
-      });
+      log(`  Direct: ${endpoint.split('/')[2]}`);
+      const resp = await axios.post(endpoint, body, { headers, timeout: 12000 });
       const token = resp.data?.access_token;
-      if (token) {
-        log(`  Token ✓ (expires in ${resp.data?.expires_in||3600}s)`);
-        return token;
-      }
-      log(`  No token in response: ${JSON.stringify(resp.data).slice(0,100)}`);
+      if (token) { log(`  Token ✓ direct`); return token; }
     } catch(e) {
-      log(`  ${endpoint.split('/')[2]}: ${e.response?.status||e.code||e.message}`);
-      if (e.response?.data) log(`  Response: ${JSON.stringify(e.response.data).slice(0,150)}`);
+      log(`  Direct failed: ${e.code||e.message}`);
+    }
+
+    // Try via allorigins proxy (POST workaround)
+    try {
+      log(`  Proxy attempt...`);
+      const proxyUrl = `https://api.allorigins.win/post?url=${encodeURIComponent(endpoint)}`;
+      const resp2 = await axios.post(proxyUrl,
+        { body, headers },
+        { headers: { 'Content-Type': 'application/json' }, timeout: 15000 }
+      );
+      const token = resp2.data?.contents
+        ? JSON.parse(resp2.data.contents)?.access_token
+        : resp2.data?.access_token;
+      if (token) { log(`  Token ✓ via proxy`); return token; }
+    } catch(e2) {
+      log(`  Proxy failed: ${e2.code||e2.message}`);
     }
     await sleep(300);
   }
-  log('  All token endpoints failed — using fallback benchmarks');
+  log('  All token attempts failed — using fallback');
   return null;
 }
 
