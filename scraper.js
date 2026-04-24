@@ -187,7 +187,442 @@ async function scrapeSearchPage(seen, allNew, purpose) {
   log(`  Total new (${purpose}): ${total}`);
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   DLD API INTEGRATION — Dubai Pulse / Data Dubai iPaaS
+   Credentials loaded from GitHub Secrets (env vars)
+   Runs weekly, calculates real PSF by area from completed transactions
+   ══════════════════════════════════════════════════════════════════ */
+
+const BENCHMARKS_FILE = path.join(DATA_DIR, 'benchmarks.json');
+
+// DDA API credentials from GitHub Secrets
+const DDA_APP_ID      = process.env.DDA_APP_ID      || '';
+const DDA_SECURITY_ID = process.env.DDA_SECURITY_ID || '';
+const DDA_CLIENT_ID   = process.env.DDA_CLIENT_ID   || '';
+const DDA_CLIENT_SECRET = process.env.DDA_CLIENT_SECRET || '';
+
+const DLD_API_BASE = 'https://apis.data.dubai/open/dld';
+
+// Base PSF benchmarks (Feb 2026 — E&V/DXB Analytics fallback)
+const BASE_PSF = {
+  'Downtown Dubai':2980,'Dubai Marina':2061,'Palm Jumeirah':3950,'Business Bay':2673,
+  'Jumeirah Village Circle':1448,'Jumeirah Beach Residence':2450,'DIFC':3500,
+  'Emaar Beachfront':3100,'Bluewaters Island':3400,'Dubai Hills Estate':2200,
+  'Arabian Ranches':1850,'Arabian Ranches 2':1750,'Arabian Ranches 3':1650,
+  'The Springs':1750,'The Meadows':2100,'The Lakes':1900,'Jumeirah Golf Estates':1900,
+  'Tilal Al Ghaf':2000,'Dubai Creek Harbour':1900,'Jumeirah Lake Towers':1400,
+  'Damac Hills':1450,'Damac Hills 2':920,'Meydan':1700,'Al Barsha':1150,
+  'Dubai South':980,'Town Square':1020,'Mudon':1350,'Al Furjan':1250,
+  'Motor City':1100,'City Walk':2800,'Jumeirah':2200,'Jumeirah Park':1600,
+  'Dubai Land':1200,'Mohammed Bin Rashid City':1800,'Damac Lagoons':1100,
+  'The Valley':1050,'Dubai Harbour':2800,'Dubai Sports City':1000,
+  'Jumeirah Islands':2400,'Nad Al Sheba':1300,'Dubai Investment Park':850,
+  'Dubai Islands':2600,'The Villa':1400,'Al Jaddaf':1600,'The Views':1800,
+  'The Oasis by Emaar':2200,'Al Barari':2800,'Zabeel':2500,'Mina Rashid':2200,
+  'Palm Jebel Ali':2800,'Maritime City':2000,'Jumeirah Village Triangle':1200,
+  'Culture Village':1500,'Jebel Ali':950,'Arjan':1050,'Expo City':1150,
+  'Falcon City':900,'Dubai Science Park':950,
+  'Saadiyat Island':3200,'Al Reem Island':1800,'Yas Island':1600,'Al Raha Beach':2000,
+};
+
+// Base yields (Goldman Sachs Feb 2026: apts 7.1%, villas 4.6%)
+const BASE_YIELDS = {
+  apartment: {
+    'Downtown Dubai':0.060,'Dubai Marina':0.066,'Palm Jumeirah':0.053,
+    'Jumeirah Beach Residence':0.062,'Business Bay':0.070,'DIFC':0.060,
+    'Emaar Beachfront':0.056,'Dubai Creek Harbour':0.062,'Dubai Hills Estate':0.059,
+    'Jumeirah Village Circle':0.078,'Jumeirah Lake Towers':0.073,'Al Barsha':0.067,
+    'Damac Hills':0.056,'Dubai South':0.082,'Mohammed Bin Rashid City':0.065,
+    'Damac Lagoons':0.068,'The Valley':0.070,'Dubai Land':0.072,
+    'Dubai Harbour':0.055,'Jumeirah':0.060,
+    'Saadiyat Island':0.056,'Al Reem Island':0.065,'Yas Island':0.068,
+    '_default': 0.071,
+  },
+  villa: {
+    'Palm Jumeirah':0.042,'Dubai Hills Estate':0.051,'Arabian Ranches':0.049,
+    'Arabian Ranches 2':0.050,'Arabian Ranches 3':0.052,'The Springs':0.059,
+    'The Meadows':0.054,'The Lakes':0.053,'Jumeirah Golf Estates':0.050,
+    'Tilal Al Ghaf':0.052,'Damac Hills':0.053,'The Valley':0.058,
+    'Damac Lagoons':0.055,'Mohammed Bin Rashid City':0.052,
+    'Saadiyat Island':0.048,'Yas Island':0.058,
+    '_default': 0.046,
+  },
+};
+
+// Maps dashboard area names to DLD area name patterns
+const AREA_DLD_MAP = {
+  'Downtown Dubai':          'DOWNTOWN DUBAI',
+  'Dubai Marina':            'DUBAI MARINA',
+  'Palm Jumeirah':           'PALM JUMEIRAH',
+  'Business Bay':            'BUSINESS BAY',
+  'Jumeirah Village Circle': 'JUMEIRAH VILLAGE CIRCLE',
+  'Jumeirah Beach Residence':'JUMEIRAH BEACH RESIDENCE',
+  'DIFC':                    'DIFC',
+  'Dubai Hills Estate':      'DUBAI HILLS ESTATE',
+  'Arabian Ranches':         'ARABIAN RANCHES',
+  'Arabian Ranches 2':       'ARABIAN RANCHES 2',
+  'Arabian Ranches 3':       'ARABIAN RANCHES 3',
+  'The Springs':             'SPRINGS',
+  'The Meadows':             'MEADOWS',
+  'The Lakes':               'LAKES',
+  'Jumeirah Golf Estates':   'JUMEIRAH GOLF ESTATES',
+  'Tilal Al Ghaf':           'TILAL AL GHAF',
+  'Dubai Creek Harbour':     'DUBAI CREEK HARBOUR',
+  'Jumeirah Lake Towers':    'JUMEIRAH LAKE TOWERS',
+  'Damac Hills':             'DAMAC HILLS',
+  'Damac Hills 2':           'DAMAC HILLS 2',
+  'Meydan':                  'MEYDAN',
+  'Al Barsha':               'AL BARSHA',
+  'Dubai South':             'DUBAI SOUTH',
+  'Emaar Beachfront':        'EMAAR BEACHFRONT',
+  'Bluewaters Island':       'BLUEWATERS ISLAND',
+  'City Walk':               'CITY WALK',
+  'Mohammed Bin Rashid City':'MOHAMMED BIN RASHID CITY',
+  'Damac Lagoons':           'DAMAC LAGOONS',
+  'The Valley':              'THE VALLEY',
+  'Dubai Harbour':           'DUBAI HARBOUR',
+  'Jumeirah':                'JUMEIRAH',
+  'Jumeirah Islands':        'JUMEIRAH ISLANDS',
+  'Al Furjan':               'AL FURJAN',
+  'Town Square':             'TOWN SQUARE',
+  'Mudon':                   'MUDON',
+  'Motor City':              'MOTOR CITY',
+  'Al Jaddaf':               'AL JADDAF',
+  'Dubai Land':              'DUBAILAND',
+  'Dubai Sports City':       'DUBAI SPORTS CITY',
+  'Saadiyat Island':         'SAADIYAT ISLAND',
+  'Al Reem Island':          'AL REEM ISLAND',
+  'Yas Island':              'YAS ISLAND',
+};
+
+async function getDLDToken() {
+  try {
+    log('  Getting DLD API token...');
+    const resp = await axios.post(
+      'https://apis.data.dubai/auth/token',
+      new URLSearchParams({
+        grant_type:    'client_credentials',
+        client_id:     DDA_CLIENT_ID,
+        client_secret: DDA_CLIENT_SECRET,
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'x-DDA-SecurityApplicationIdentifier': DDA_SECURITY_ID,
+        },
+        timeout: 15000,
+      }
+    );
+    const token = resp.data?.access_token;
+    if (!token) throw new Error('No access_token in response');
+    log(`  Token obtained ✓`);
+    return token;
+  } catch(e) {
+    // Try alternate auth endpoint
+    try {
+      const resp2 = await axios.post(
+        `https://apis.data.dubai/open/dld/token`,
+        { client_id: DDA_CLIENT_ID, client_secret: DDA_CLIENT_SECRET },
+        {
+          headers: {
+            'x-DDA-SecurityApplicationIdentifier': DDA_SECURITY_ID,
+            'Content-Type': 'application/json',
+          },
+          timeout: 15000,
+        }
+      );
+      const token = resp2.data?.access_token || resp2.data?.token;
+      if (token) { log(`  Token obtained (alt) ✓`); return token; }
+    } catch(e2) {}
+    log(`  Token failed: ${e.message}`);
+    return null;
+  }
+}
+
+async function fetchDLDTransactions(token, areaName, months = 3) {
+  // Fetch last N months of completed residential transactions for an area
+  const endDate   = new Date();
+  const startDate = new Date();
+  startDate.setMonth(startDate.getMonth() - months);
+  const fmt = d => d.toISOString().split('T')[0];
+
+  const endpoints = [
+    `${DLD_API_BASE}/dld_transactions-open-api`,
+    `${DLD_API_BASE}/transactions`,
+    `https://apis.data.dubai/open/dld/dld_transactions-open-api`,
+  ];
+
+  const params = {
+    area_name_en:   areaName,
+    trans_group_en: 'Sales',
+    prop_type_en:   'Unit',
+    start_date:     fmt(startDate),
+    end_date:       fmt(endDate),
+    limit:          500,
+  };
+
+  for (const endpoint of endpoints) {
+    try {
+      const resp = await axios.get(endpoint, {
+        headers: {
+          'Authorization':                       `Bearer ${token}`,
+          'x-DDA-SecurityApplicationIdentifier': DDA_SECURITY_ID,
+          'ApplicationId':                       DDA_APP_ID,
+          'Content-Type':                        'application/json',
+        },
+        params,
+        timeout: 20000,
+      });
+      const data = resp.data;
+      // Handle various response formats
+      const rows = data?.result || data?.data || data?.transactions || data?.response || 
+                   (Array.isArray(data) ? data : []);
+      if (rows.length > 0) return rows;
+    } catch(e) {
+      log(`    ${endpoint.split('/').pop()}: ${e.response?.status || e.message}`);
+    }
+    await sleep(300);
+  }
+  return [];
+}
+
+function calcAreaPSF(transactions) {
+  // Calculate median PSF from DLD transactions
+  const valid = transactions.filter(t => {
+    const price = parseFloat(t.trans_value || t.amount || t.price || 0);
+    const area  = parseFloat(t.procedure_area || t.area_sqft || t.size || 0);
+    return price > 100000 && area > 100;
+  });
+  if (!valid.length) return null;
+  const psfs = valid
+    .map(t => parseFloat(t.trans_value || t.amount || t.price) /
+              parseFloat(t.procedure_area || t.area_sqft || t.size))
+    .filter(p => p > 200 && p < 20000)
+    .sort((a, b) => a - b);
+  if (!psfs.length) return null;
+  // Median
+  const mid = Math.floor(psfs.length / 2);
+  return Math.round(psfs.length % 2 ? psfs[mid] : (psfs[mid-1]+psfs[mid])/2);
+}
+
+async function updateBenchmarks() {
+  log('\n-- BENCHMARK UPDATE (DLD API) --');
+
+  // Check if update needed (weekly)
+  let existing = null;
+  if (fs.existsSync(BENCHMARKS_FILE)) {
+    try { existing = JSON.parse(fs.readFileSync(BENCHMARKS_FILE, 'utf8')); } catch(e) {}
+  }
+  if (existing?.updatedAt) {
+    const daysSince = (Date.now() - new Date(existing.updatedAt)) / 86400000;
+    if (daysSince < 6) {
+      log(`  Benchmarks current (updated ${daysSince.toFixed(1)}d ago) — skipping`);
+      return;
+    }
+  }
+
+  // Check credentials
+  if (!DDA_CLIENT_ID || !DDA_CLIENT_SECRET) {
+    log('  No DLD credentials — using fallback benchmarks');
+    _writeFallbackBenchmarks();
+    return;
+  }
+
+  // Get auth token
+  const token = await getDLDToken();
+  if (!token) {
+    log('  Auth failed — using fallback benchmarks');
+    _writeFallbackBenchmarks();
+    return;
+  }
+
+  // Fetch PSF for top 20 areas (most impactful for NAV accuracy)
+  const TOP_AREAS = [
+    'Downtown Dubai','Dubai Marina','Palm Jumeirah','Business Bay',
+    'Jumeirah Village Circle','Jumeirah Beach Residence','Dubai Hills Estate',
+    'Arabian Ranches','The Springs','The Meadows','DIFC','Emaar Beachfront',
+    'Jumeirah Lake Towers','Damac Hills','Meydan','Al Barsha',
+    'Mohammed Bin Rashid City','Dubai Creek Harbour','Dubai Harbour','The Valley',
+  ];
+
+  const livePSF = { ...BASE_PSF }; // start with base, override with live
+  let successCount = 0;
+
+  log(`  Fetching PSF for ${TOP_AREAS.length} areas...`);
+  for (const area of TOP_AREAS) {
+    const dldName = AREA_DLD_MAP[area];
+    if (!dldName) continue;
+    try {
+      const txns = await fetchDLDTransactions(token, dldName, 3);
+      if (txns.length >= 5) { // need at least 5 transactions for reliable median
+        const psf = calcAreaPSF(txns);
+        if (psf && psf > 500 && psf < 15000) {
+          livePSF[area] = psf;
+          successCount++;
+          log(`  ✓ ${area}: AED ${psf}/sqft (${txns.length} txns)`);
+        } else {
+          log(`  ~ ${area}: PSF out of range (${psf}) — using base`);
+        }
+      } else {
+        log(`  ~ ${area}: only ${txns.length} txns — using base`);
+      }
+    } catch(e) {
+      log(`  ✗ ${area}: ${e.message}`);
+    }
+    await sleep(400);
+  }
+
+  log(`\n  DLD API: ${successCount}/${TOP_AREAS.length} areas updated with live data`);
+
+  const benchmarks = {
+    updatedAt:    new Date().toISOString(),
+    source:       successCount > 0 ? 'DLD_API_LIVE' : 'FALLBACK',
+    areasUpdated: successCount,
+    psf:          livePSF,
+    yields:       BASE_YIELDS,
+    notes: {
+      base:       'Feb 2026 E&V/DXB Analytics',
+      live:       `${successCount} areas updated from DLD completed transactions (last 3 months)`,
+      apartments: 'Gross yield 7.1% market avg (Goldman Sachs Feb 2026)',
+      villas:     'Gross yield 4.6% market avg (Goldman Sachs Feb 2026)',
+    },
+  };
+
+  fs.writeFileSync(BENCHMARKS_FILE, JSON.stringify(benchmarks, null, 2));
+  log(`  Benchmarks saved ✓ — ${successCount} live areas, ${Object.keys(livePSF).length - successCount} fallback`);
+}
+
+function _writeFallbackBenchmarks() {
+  // Write base benchmarks with monthly drift applied
+  const monthsSince = Math.max(0, (Date.now() - new Date('2026-02-01')) / (30*86400000));
+  const adj = Math.pow(1.007, monthsSince);
+  const psf = {};
+  Object.entries(BASE_PSF).forEach(([a, v]) => { psf[a] = Math.round(v * adj); });
+  fs.writeFileSync(BENCHMARKS_FILE, JSON.stringify({
+    updatedAt: new Date().toISOString(),
+    source: 'FALLBACK_DRIFT',
+    adjFactor: +adj.toFixed(4),
+    psf, yields: BASE_YIELDS,
+    notes: { base: 'Feb 2026 + 0.7% mom drift (Goldman/REIDIN)' },
+  }, null, 2));
+  log(`  Fallback benchmarks written (adj ${adj.toFixed(4)}x)`);
+}
+
+
+
+async function fetchPropertyMonitorPSF() {
+  // Scrape Property Monitor's dynamic price index page for headline PSF
+  try {
+    log('  Fetching Property Monitor DPI...');
+    const urls = [
+      'https://propertymonitor.com/insights/dynamic-price-index',
+      'https://propertymonitor.com/insights/category/monthly-market-report',
+    ];
+    for (const url of urls) {
+      const html = await fetchPage(url);
+      if (!html) continue;
+      // Look for PSF pattern: AED X,XXX per sq ft or X,XXX psf
+      const psfMatch = html.match(/AED\s*([\d,]+)\s*per\s*sq(?:uare)?\s*ft/i)
+        || html.match(/([\d,]+)\s*per\s*sq\s*ft/i)
+        || html.match(/AED\s*(1[,\s]?\d{3})\s*psf/i);
+      if (psfMatch) {
+        const psf = parseInt(psfMatch[1].replace(/,|\s/g, ''));
+        if (psf > 800 && psf < 5000) {
+          log(`  Property Monitor PSF: AED ${psf}/sqft`);
+          return { source: 'PropertyMonitor', psf, date: new Date().toISOString() };
+        }
+      }
+      await sleep(500);
+    }
+    throw new Error('PSF not found in page');
+  } catch(e) {
+    log(`  Property Monitor failed: ${e.message}`);
+    return null;
+  }
+}
+
+async function updateBenchmarks() {
+  log('\n-- BENCHMARK UPDATE --');
+
+  // Load existing benchmarks or use base
+  let existing = null;
+  if (fs.existsSync(BENCHMARKS_FILE)) {
+    try { existing = JSON.parse(fs.readFileSync(BENCHMARKS_FILE, 'utf8')); } catch(e) {}
+  }
+
+  // Only update weekly (skip if updated in last 6 days)
+  if (existing?.updatedAt) {
+    const daysSince = (Date.now() - new Date(existing.updatedAt)) / 86400000;
+    if (daysSince < 6) {
+      log(`  Benchmarks current (updated ${daysSince.toFixed(1)}d ago) — skipping`);
+      return;
+    }
+  }
+
+  // Try data sources
+  const dldData = await fetchDLDIndex();
+  await sleep(500);
+  const pmData  = await fetchPropertyMonitorPSF();
+
+  // Determine adjustment factor
+  let adjFactor = 1.0;
+  let adjSource = 'None';
+  let marketPSF = null;
+
+  if (pmData?.psf) {
+    // Property Monitor gives us the actual current market avg PSF
+    // Base (Feb 2026) avg across all areas weighted = ~1,800 AED/sqft
+    const basePSF = 1800;
+    adjFactor = pmData.psf / basePSF;
+    adjSource = `PropertyMonitor (${pmData.psf} AED/sqft)`;
+    marketPSF = pmData.psf;
+  } else if (dldData?.yoyChange) {
+    // Use DLD index yoy change applied since Feb 2026 base
+    // Base was Feb 2026, so we apply partial-year movement
+    const monthsSinceBase = (Date.now() - new Date('2026-02-01')) / (30 * 86400000);
+    const annualRate = dldData.yoyChange;
+    adjFactor = 1 + (annualRate * monthsSinceBase / 12);
+    adjSource = `DLD_RPPI (YoY ${(dldData.yoyChange*100).toFixed(1)}%)`;
+  } else {
+    // Fallback: Goldman/REIDIN confirmed +10.8% yoy to Feb 2026
+    // Apply monthly drift since Feb 2026 at 0.7% mom
+    const monthsSinceBase = Math.max(0, (Date.now() - new Date('2026-02-01')) / (30 * 86400000));
+    adjFactor = Math.pow(1.007, monthsSinceBase); // 0.7% mom compounded
+    adjSource = `Goldman/REIDIN fallback (0.7% mom since Feb 2026)`;
+  }
+
+  // Apply adjustment to all area PSFs
+  const updatedPSF = {};
+  Object.entries(BASE_PSF).forEach(([area, basePsf]) => {
+    updatedPSF[area] = Math.round(basePsf * adjFactor);
+  });
+
+  const benchmarks = {
+    updatedAt:   new Date().toISOString(),
+    adjFactor:   +adjFactor.toFixed(4),
+    adjSource,
+    marketAvgPSF: marketPSF || Math.round(1800 * adjFactor),
+    dldIndex:    dldData,
+    psf:         updatedPSF,
+    yields:      BASE_YIELDS,
+    notes: {
+      base: 'Feb 2026 E&V/DXB Analytics',
+      apartments: 'Gross yield 7.1% (Goldman Sachs Feb 2026)',
+      villas:     'Gross yield 4.6% (Goldman Sachs Feb 2026)',
+    },
+  };
+
+  fs.writeFileSync(BENCHMARKS_FILE, JSON.stringify(benchmarks, null, 2));
+  log(`  Benchmarks updated. Factor: ${adjFactor.toFixed(4)}x | Source: ${adjSource}`);
+  log(`  Market avg PSF: AED ${benchmarks.marketAvgPSF}/sqft`);
+}
+
+
 async function main() {
+  // Update benchmarks weekly (skips if updated recently)
+  await updateBenchmarks();
+  await sleep(500);
+
   const runAt  = new Date().toISOString();
   const allNew = [];
   const seen   = new Set();
