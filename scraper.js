@@ -314,49 +314,56 @@ const AREA_DLD_MAP = {
 };
 
 async function getDLDToken() {
-  const tokenEndpoints = [
-    'https://apis.data.dubai/auth/realms/ddads/protocol/openid-connect/token',
-    'https://stg-apis.data.dubai/auth/token',
-    'https://apis.data.dubai/auth/token',
-    'https://ipaas.dubai.gov.ae/auth/token',
+  // Exact endpoints from ICD doc: {baseURL}/secure/sdg/ssis/gatewayoauthtoken/1.0.0/getAccessToken
+  const endpoints = [
+    'https://stg-apis.data.dubai/secure/sdg/ssis/gatewayoauthtoken/1.0.0/getAccessToken',
+    'https://apis.data.dubai/secure/sdg/ssis/gatewayoauthtoken/1.0.0/getAccessToken',
   ];
-  const body = new URLSearchParams({
+  // Request format: JSON body (not form-encoded) per ICD doc
+  const body = {
     grant_type:    'client_credentials',
     client_id:     DDA_CLIENT_ID,
     client_secret: DDA_CLIENT_SECRET,
-  });
-  for (const endpoint of tokenEndpoints) {
+  };
+  for (const endpoint of endpoints) {
     try {
-      log(`  Trying: ${endpoint.split('/').slice(2,4).join('/')}`);
-      const resp = await axios.post(endpoint, body.toString(), {
+      log(`  Trying: ${endpoint.split('/')[2]}`);
+      const resp = await axios.post(endpoint, body, {
         headers: {
-          'Content-Type':                        'application/x-www-form-urlencoded',
+          'Content-Type':                        'application/json',
           'x-DDA-SecurityApplicationIdentifier': DDA_SECURITY_ID,
-          'ApplicationId':                       DDA_APP_ID,
         },
-        timeout: 10000,
+        timeout: 12000,
       });
-      const token = resp.data?.access_token || resp.data?.token;
-      if (token) { log(`  Token ✓ from ${endpoint.split('/')[2]}`); return token; }
+      const token = resp.data?.access_token;
+      if (token) {
+        log(`  Token ✓ (expires in ${resp.data?.expires_in||3600}s)`);
+        return token;
+      }
+      log(`  No token in response: ${JSON.stringify(resp.data).slice(0,100)}`);
     } catch(e) {
       log(`  ${endpoint.split('/')[2]}: ${e.response?.status||e.code||e.message}`);
+      if (e.response?.data) log(`  Response: ${JSON.stringify(e.response.data).slice(0,150)}`);
     }
     await sleep(300);
   }
-  log('  All token endpoints failed');
+  log('  All token endpoints failed — using fallback benchmarks');
   return null;
 }
 
 async function fetchDLDTransactions(token, areaName, months = 3) {
-  // Fetch last N months of completed residential transactions for an area
   const endDate   = new Date();
   const startDate = new Date();
   startDate.setMonth(startDate.getMonth() - months);
   const fmt = d => d.toISOString().split('T')[0];
 
+  // Exact endpoints from OpenAPI ICD doc v2.1:
+  // GET {BaseURL}/secure/ddads/openapi/1.0.0/<Entity>/<Dataset>
+  // Alias: /open/<Entity>/<Dataset>
   const endpoints = [
-    `${DLD_API_BASE}/dld_transactions-open-api`,
-    `${DLD_API_BASE}/transactions`,
+    `https://stg-apis.data.dubai/secure/ddads/openapi/1.0.0/dld/dld_transactions-open-api`,
+    `https://stg-apis.data.dubai/open/dld/dld_transactions-open-api`,
+    `https://apis.data.dubai/secure/ddads/openapi/1.0.0/dld/dld_transactions-open-api`,
     `https://apis.data.dubai/open/dld/dld_transactions-open-api`,
   ];
 
@@ -375,21 +382,21 @@ async function fetchDLDTransactions(token, areaName, months = 3) {
         headers: {
           'Authorization':                       `Bearer ${token}`,
           'x-DDA-SecurityApplicationIdentifier': DDA_SECURITY_ID,
-          'ApplicationId':                       DDA_APP_ID,
-          'Content-Type':                        'application/json',
         },
         params,
         timeout: 8000,
       });
       const data = resp.data;
-      // Handle various response formats
-      const rows = data?.result || data?.data || data?.transactions || data?.response || 
+      const rows = data?.results || data?.result || data?.data ||
                    (Array.isArray(data) ? data : []);
-      if (rows.length > 0) return rows;
+      if (rows.length > 0) {
+        log(`    ✓ ${areaName}: ${rows.length} txns`);
+        return rows;
+      }
     } catch(e) {
-      log(`    ${endpoint.split('/').pop()}: ${e.response?.status || e.message}`);
+      log(`    ${endpoint.split('/')[2]}: ${e.response?.status||e.code||e.message}`);
     }
-    await sleep(300);
+    await sleep(200);
   }
   return [];
 }
