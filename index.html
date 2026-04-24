@@ -595,6 +595,45 @@ footer{border-top:1px solid var(--bd);padding:9px 16px;display:flex;justify-cont
     <div class="ms-title">Average PSF by Area (DLD Benchmarks)</div>
     <div id="ms-psf-bars"></div>
   </div>
+
+  <!-- DLD LIVE SECTION — shown when API data is available -->
+  <div id="ms-dld-section" style="display:none">
+    <div style="font-family:var(--pdisplay);font-size:15px;font-style:italic;color:var(--teal2);font-weight:600;margin:14px 0 4px">DLD Live Analytics</div>
+    <div style="font-family:var(--pmono);font-size:9px;color:var(--dim);margin-bottom:12px">Sourced from completed DLD transactions · Updated weekly</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="ms-section">
+        <div class="ms-title">Transaction Volume Velocity (%)</div>
+        <div style="font-family:var(--pmono);font-size:8px;color:var(--dim);margin-bottom:8px">Current 90d vs prior 90d — positive = accelerating demand</div>
+        <div id="ms-velocity"></div>
+      </div>
+      <div class="ms-section">
+        <div class="ms-title">Transaction Volume by Area (90d)</div>
+        <div style="font-family:var(--pmono);font-size:8px;color:var(--dim);margin-bottom:8px">Completed DLD sales — proxy for liquidity</div>
+        <div id="ms-volume"></div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div class="ms-section">
+        <div class="ms-title">Cash vs Mortgage Split</div>
+        <div style="font-family:var(--pmono);font-size:8px;color:var(--dim);margin-bottom:8px">High cash % = stronger demand, less rate-sensitive</div>
+        <div id="ms-cash"></div>
+      </div>
+      <div class="ms-section">
+        <div class="ms-title">Secondary vs Off-Plan Split</div>
+        <div style="font-family:var(--pmono);font-size:8px;color:var(--dim);margin-bottom:8px">High secondary % = genuine end-user demand</div>
+        <div id="ms-secondary"></div>
+      </div>
+    </div>
+
+    <div class="ms-section">
+      <div class="ms-title" style="color:var(--red2)">⚠ Supply Shock Detector</div>
+      <div style="font-family:var(--pmono);font-size:8px;color:var(--dim);margin-bottom:8px">Areas with transaction volume down >30% — potential supply pressure or demand shock</div>
+      <div id="ms-shocks"></div>
+    </div>
+  </div>
+
 </div>
 
 </div><!-- /main -->
@@ -679,6 +718,11 @@ footer{border-top:1px solid var(--bd);padding:9px 16px;display:flex;justify-cont
         <span style="font-family:var(--pmono);font-size:8px;color:var(--dim)">Bull: <span id="m-lirr-bull" style="color:var(--teal2);font-weight:700">—</span></span>
         <span style="font-family:var(--pmono);font-size:8px;color:var(--dim)">LTV: <span id="m-ltv" style="color:var(--cream);font-weight:700">—</span></span>
       </div>
+    </div>
+    <!-- DLD Comparable Transactions -->
+    <div class="m-ana" id="m-comps-wrap">
+      <div class="m-ah"><span style="color:var(--teal2)">⊞ DLD Comparable Transactions</span><span style="font-family:var(--pmono);font-size:8px;color:var(--dim)">Completed sales · last 90 days</span></div>
+      <div id="m-comps"></div>
     </div>
     <!-- Analysis -->
     <div class="m-ana">
@@ -1023,7 +1067,8 @@ function makeSignal(ms) {
 }
 
 // Live benchmarks loaded from GitHub (updated weekly by scraper)
-let LIVE_BENCHMARKS = null;
+let LIVE_BENCHMARKS   = null;
+let LIVE_TRANSACTIONS = null; // DLD comparable transactions
 
 async function loadBenchmarks() {
   try {
@@ -1031,9 +1076,22 @@ async function loadBenchmarks() {
     const resp = await fetch(url, { signal: makeSignal(8000) });
     if (!resp.ok) return;
     LIVE_BENCHMARKS = await resp.json();
-    log(`✓ Live benchmarks loaded (${LIVE_BENCHMARKS.adjSource}) factor=${LIVE_BENCHMARKS.adjFactor}`, 'ok');
+    log(`✓ Live benchmarks loaded (${LIVE_BENCHMARKS.source||'—'}) ${LIVE_BENCHMARKS.areasUpdated||0} areas`, 'ok');
   } catch(e) {
-    log(`Benchmarks fallback to hardcoded (${e.message})`, 'warn');
+    log(`Benchmarks fallback (${e.message})`, 'warn');
+  }
+}
+
+async function loadTransactions() {
+  try {
+    const url = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/data/transactions.json?t=${Date.now()}`;
+    const resp = await fetch(url, { signal: makeSignal(8000) });
+    if (!resp.ok) return;
+    const data = await resp.json();
+    LIVE_TRANSACTIONS = data?.data || [];
+    log(`✓ ${LIVE_TRANSACTIONS.length} DLD comparables loaded`, 'ok');
+  } catch(e) {
+    log(`Transactions not available (${e.message})`, 'warn');
   }
 }
 
@@ -1056,8 +1114,8 @@ function getLiveYield(area, type, beds) {
 }
 
 async function fetchGitHub() {
-  // Load benchmarks in parallel
-  await loadBenchmarks();
+  // Load benchmarks and transactions in parallel
+  await Promise.all([loadBenchmarks(), loadTransactions()]);
 
   const url = `https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/data/listings.json?t=${Date.now()}`;
   const resp = await fetch(url, { signal: makeSignal(12000) });
@@ -1479,21 +1537,52 @@ function renderAreaIntel(){
   const grid=document.getElementById('area-grid');if(!grid)return;
   grid.innerHTML=Object.keys(AREA_INTEL).sort((a,b)=>AREA_INTEL[b].demand-AREA_INTEL[a].demand).map(area=>{
     const intel=AREA_INTEL[area];const dldV=DLD_SQFT[area];
+    const livePSF=LIVE_BENCHMARKS?.psf?.[area];
+    const stats=getAreaStats(area);
     const adrops=L.filter(l=>l.area===area);
     const sC=intel.supply<=2?'var(--teal2)':intel.supply===3?'var(--amber)':'var(--red2)';
     const sT=['','Low','Low-Med','Medium','High','Very High'][intel.supply]||'—';
     const lC=['','var(--red2)','var(--amber)','var(--teal2)'][intel.liquidity]||'var(--muted)';
-    return`<div class="ac"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px"><div class="ac-name">${area}</div>${adrops.length?`<span style="font-family:var(--pmono);font-size:8px;padding:2px 5px;background:rgba(240,165,0,.1);border:1px solid var(--bd2);color:var(--amber);border-radius:2px">${adrops.length}</span>`:''}</div>
+    // Live vs hardcoded PSF
+    const displayPSF = livePSF || dldV;
+    const psfSource  = livePSF ? '🟢 live' : dldV ? '⬡ base' : '—';
+    // Velocity
+    const vel = stats?.velocity;
+    const velC = vel==null?'var(--muted)':vel>=20?'var(--teal2)':vel>=0?'var(--blue2)':'var(--red2)';
+    // Transaction volume
+    const vol = stats?.count;
+    // Cash%
+    const cashPct = stats?.cashPct;
+    // Secondary%
+    const secPct = stats?.secondaryPct;
+    // Price change
+    const priceChg = stats?.priceChange;
+    const pcC = priceChg==null?'var(--muted)':priceChg>=5?'var(--teal2)':priceChg>=0?'var(--blue2)':'var(--red2)';
+    // Supply shock warning
+    const shockWarn = vel!=null&&vel<-30 ? `<div style="font-family:var(--pmono);font-size:8px;color:var(--red2);margin-top:5px;padding:4px 6px;background:rgba(212,64,64,.07);border-radius:2px">⚠ Volume drop ${vel}% — potential supply shock</div>` : '';
+    return`<div class="ac"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px">
+      <div class="ac-name">${area}</div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end">
+        ${adrops.length?`<span style="font-family:var(--pmono);font-size:8px;padding:2px 5px;background:rgba(240,165,0,.1);border:1px solid var(--bd2);color:var(--amber);border-radius:2px">${adrops.length} drops</span>`:''}
+        ${livePSF?`<span style="font-family:var(--pmono);font-size:7px;padding:2px 4px;background:rgba(0,168,120,.08);border:1px solid rgba(0,168,120,.2);color:var(--teal2);border-radius:2px">DLD LIVE</span>`:''}
+      </div></div>
     <div style="font-family:var(--pmono);font-size:8px;color:var(--dim);margin-bottom:7px;padding-bottom:7px;border-bottom:1px solid var(--bd)">${intel.type}</div>
     <div class="ac-metrics">
-      <div class="acm"><div class="acm-l">DLD /sqft</div><div class="acm-v" style="color:var(--amber)">${dldV?dldV.toLocaleString():'—'}</div></div>
+      <div class="acm"><div class="acm-l">PSF (${psfSource})</div><div class="acm-v" style="color:var(--amber)">${displayPSF?displayPSF.toLocaleString():'—'}</div></div>
       <div class="acm"><div class="acm-l">Demand</div><div class="acm-v" style="color:${intel.demand>=8?'var(--teal2)':intel.demand>=6?'var(--blue2)':'var(--amber)'}">${intel.demand}/10</div></div>
       <div class="acm"><div class="acm-l">Supply Risk</div><div class="acm-v" style="color:${sC}">${sT}</div></div>
       <div class="acm"><div class="acm-l">Liquidity</div><div class="acm-v" style="color:${lC}">${['','Low','Med','High'][intel.liquidity]||'—'}</div></div>
-      <div class="acm"><div class="acm-l">YoY</div><div class="acm-v" style="color:${intel.yoy>=8?'var(--teal2)':'var(--blue2)'}">+${intel.yoy}%</div></div>
+      <div class="acm"><div class="acm-l">YoY Price</div><div class="acm-v" style="color:${intel.yoy>=8?'var(--teal2)':'var(--blue2)'}">+${intel.yoy}%</div></div>
       <div class="acm"><div class="acm-l">Pipeline</div><div class="acm-v" style="color:${intel.pipeline==='Very Low'||intel.pipeline==='Low'?'var(--teal2)':intel.pipeline==='Medium'?'var(--amber)':'var(--red2)'};font-size:10px">${intel.pipeline}</div></div>
+      ${vol!=null?`<div class="acm"><div class="acm-l">Txn Vol (90d)</div><div class="acm-v" style="color:var(--cream)">${vol}</div></div>`:''}
+      ${vel!=null?`<div class="acm"><div class="acm-l">Vol Velocity</div><div class="acm-v" style="color:${velC}">${vel>0?'+':''}${vel}%</div></div>`:''}
+      ${cashPct!=null?`<div class="acm"><div class="acm-l">Cash Buyers</div><div class="acm-v" style="color:${cashPct>=60?'var(--teal2)':cashPct>=40?'var(--amber)':'var(--red2)'}">${cashPct}%</div></div>`:''}
+      ${secPct!=null?`<div class="acm"><div class="acm-l">Secondary Mkt</div><div class="acm-v" style="color:var(--cream)">${secPct}%</div></div>`:''}
+      ${priceChg!=null?`<div class="acm"><div class="acm-l">PSF Change 90d</div><div class="acm-v" style="color:${pcC}">${priceChg>0?'+':''}${priceChg}%</div></div>`:''}
     </div>
     <div class="risk-bar"><div class="risk-fill" style="width:${intel.supply/5*100}%;background:${sC}"></div></div>
+    ${stats?.topDevs?.length?`<div class="ac-drops" style="margin-top:5px">Top devs: <span style="color:var(--muted)">${stats.topDevs.join(' · ')}</span></div>`:''}
+    ${shockWarn}
     ${adrops.length?`<div class="ac-drops">Best IRR: <span style="color:var(--teal2)">${pc(Math.max(...adrops.map(l=>l.scenarios.base.irr)))}</span> · Avg score: <span style="color:var(--amber)">${(adrops.reduce((s,l)=>s+l.score,0)/adrops.length).toFixed(1)}</span></div>`:''}
     <div style="font-family:var(--psans);font-size:8.5px;color:var(--dim);margin-top:7px;line-height:1.6">${intel.thesis}</div></div>`;
   }).join('');
@@ -1524,7 +1613,6 @@ function updatePortSummary(){
 /* ══ MARKET STATS ════════════════════════════════════════════════════════ */
 function renderMarketStats(){
   if(!L.length)return;
-  // Try to load stats.json from GitHub
   fetch(`https://raw.githubusercontent.com/${GITHUB_USER}/${GITHUB_REPO}/main/data/stats.json?t=${Date.now()}`)
     .then(r=>r.ok?r.json():null).then(stats=>{
       if(stats){
@@ -1535,7 +1623,7 @@ function renderMarketStats(){
       }
     }).catch(()=>{});
 
-  // Area drops bar chart
+  // ── Area drops bar chart ──────────────────────────────────────────────────
   const areaCounts={};
   L.forEach(l=>{areaCounts[l.area]=(areaCounts[l.area]||0)+1;});
   const sorted=Object.entries(areaCounts).sort((a,b)=>b[1]-a[1]).slice(0,12);
@@ -1543,16 +1631,118 @@ function renderMarketStats(){
   const areaEl=document.getElementById('ms-area-bars');
   if(areaEl){areaEl.innerHTML=sorted.map(([area,cnt])=>`<div class="ms-bar-row"><div class="ms-bar-label">${area}</div><div class="ms-bar-track"><div class="ms-bar-fill" style="width:${(cnt/maxCount*100).toFixed(0)}%"></div></div><div class="ms-bar-val">${cnt}</div></div>`).join('');}
 
-  // Top drops
+  // ── Top drops ─────────────────────────────────────────────────────────────
   const topDrops=[...L].sort((a,b)=>a.drop-b.drop).slice(0,8);
   const topEl=document.getElementById('ms-top-drops');
   if(topEl){topEl.innerHTML=topDrops.map(l=>`<div class="ms-top-row" onclick="openModal('${l._id}')"><div style="flex:1"><div style="font-family:var(--pdisplay);font-size:12px;font-style:italic;color:var(--cream)">${l.area}</div><div style="font-family:var(--pmono);font-size:8px;color:var(--muted)">${bl(l.beds)} ${l.type} · ${f$(l.ask)}</div></div><span style="font-family:var(--pmono);font-size:13px;font-weight:700;color:var(--red2)">${l.drop}%</span></div>`).join('');}
 
-  // PSF bar chart
-  const psfData=Object.entries(DLD_SQFT).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  // ── PSF benchmark bar chart ───────────────────────────────────────────────
+  const psfData=Object.entries(LIVE_BENCHMARKS?.psf||DLD_SQFT)
+    .filter(([k])=>!k.includes('_apt')&&!k.includes('_vil'))
+    .sort((a,b)=>b[1]-a[1]).slice(0,15);
   const maxPSF=psfData[0]?.[1]||1;
   const psfEl=document.getElementById('ms-psf-bars');
-  if(psfEl){psfEl.innerHTML=psfData.map(([area,psf])=>`<div class="ms-bar-row"><div class="ms-bar-label">${area}</div><div class="ms-bar-track"><div class="ms-bar-fill" style="width:${(psf/maxPSF*100).toFixed(0)}%;background:var(--blue2)"></div></div><div class="ms-bar-val">${psf.toLocaleString()}</div></div>`).join('');}
+  if(psfEl){
+    const source = LIVE_BENCHMARKS?.source==='DLD_API_LIVE' ? '🟢 DLD Live' : '⬡ Base estimates';
+    psfEl.innerHTML=`<div style="font-family:var(--pmono);font-size:8px;color:var(--dim);margin-bottom:8px">Source: ${source} · Updated: ${LIVE_BENCHMARKS?.updatedAt?new Date(LIVE_BENCHMARKS.updatedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short'}):'Feb 2026'}</div>`+
+    psfData.map(([area,psf])=>`<div class="ms-bar-row"><div class="ms-bar-label">${area}</div><div class="ms-bar-track"><div class="ms-bar-fill" style="width:${(psf/maxPSF*100).toFixed(0)}%;background:var(--blue2)"></div></div><div class="ms-bar-val">${psf.toLocaleString()}</div></div>`).join('');}
+
+  // ── DLD LIVE CHARTS (only if benchmarks loaded) ───────────────────────────
+  const aStats = LIVE_BENCHMARKS?.areaStats;
+  const dldSection = document.getElementById('ms-dld-section');
+
+  if(aStats && Object.keys(aStats).length > 0) {
+    if(dldSection) dldSection.style.display='block';
+
+    // Price velocity heatmap
+    const velEl = document.getElementById('ms-velocity');
+    if(velEl) {
+      const velData = Object.entries(aStats)
+        .filter(([,s])=>s.velocity!=null)
+        .sort((a,b)=>b[1].velocity-a[1].velocity);
+      const maxVel = Math.max(...velData.map(([,s])=>Math.abs(s.velocity||0)),1);
+      velEl.innerHTML = velData.slice(0,12).map(([area,s])=>{
+        const v = s.velocity;
+        const col = v>=20?'var(--teal2)':v>=0?'var(--blue2)':'var(--red2)';
+        const w = (Math.abs(v)/maxVel*100).toFixed(0);
+        return `<div class="ms-bar-row">
+          <div class="ms-bar-label">${area}</div>
+          <div class="ms-bar-track"><div class="ms-bar-fill" style="width:${w}%;background:${col}"></div></div>
+          <div class="ms-bar-val" style="color:${col}">${v>0?'+':''}${v}%</div>
+        </div>`;
+      }).join('');
+    }
+
+    // Cash vs Mortgage split
+    const cashEl = document.getElementById('ms-cash');
+    if(cashEl) {
+      const cashData = Object.entries(aStats)
+        .filter(([,s])=>s.cashPct!=null)
+        .sort((a,b)=>b[1].cashPct-a[1].cashPct);
+      cashEl.innerHTML = cashData.slice(0,10).map(([area,s])=>{
+        const col = s.cashPct>=60?'var(--teal2)':s.cashPct>=40?'var(--amber)':'var(--red2)';
+        return `<div class="ms-bar-row">
+          <div class="ms-bar-label">${area}</div>
+          <div class="ms-bar-track" style="position:relative">
+            <div style="position:absolute;left:0;top:0;height:100%;width:${s.cashPct}%;background:var(--teal2);border-radius:3px 0 0 3px"></div>
+            <div style="position:absolute;right:0;top:0;height:100%;width:${100-s.cashPct}%;background:var(--amber);border-radius:0 3px 3px 0"></div>
+          </div>
+          <div class="ms-bar-val" style="color:${col}">${s.cashPct}%</div>
+        </div>`;
+      }).join('')+'<div style="font-family:var(--pmono);font-size:7.5px;color:var(--dim);margin-top:6px"><span style="color:var(--teal2)">█</span> Cash &nbsp;<span style="color:var(--amber)">█</span> Mortgage</div>';
+    }
+
+    // Off-plan vs Secondary split
+    const secEl = document.getElementById('ms-secondary');
+    if(secEl) {
+      const secData = Object.entries(aStats)
+        .filter(([,s])=>s.secondaryPct!=null)
+        .sort((a,b)=>b[1].secondaryPct-a[1].secondaryPct);
+      secEl.innerHTML = secData.slice(0,10).map(([area,s])=>{
+        const col = s.secondaryPct>=70?'var(--teal2)':s.secondaryPct>=50?'var(--blue2)':'var(--amber)';
+        return `<div class="ms-bar-row">
+          <div class="ms-bar-label">${area}</div>
+          <div class="ms-bar-track" style="position:relative">
+            <div style="position:absolute;left:0;top:0;height:100%;width:${s.secondaryPct}%;background:var(--teal2);border-radius:3px 0 0 3px"></div>
+            <div style="position:absolute;right:0;top:0;height:100%;width:${100-s.secondaryPct}%;background:var(--purple);border-radius:0 3px 3px 0"></div>
+          </div>
+          <div class="ms-bar-val" style="color:${col}">${s.secondaryPct}%</div>
+        </div>`;
+      }).join('')+'<div style="font-family:var(--pmono);font-size:7.5px;color:var(--dim);margin-top:6px"><span style="color:var(--teal2)">█</span> Secondary &nbsp;<span style="color:var(--purple)">█</span> Off-plan</div>';
+    }
+
+    // Supply shock detector
+    const shockEl = document.getElementById('ms-shocks');
+    if(shockEl) {
+      const shocks = detectSupplyShocks();
+      shockEl.innerHTML = shocks.length
+        ? shocks.map(s=>`<div class="ms-top-row" style="cursor:default">
+            <div style="flex:1">
+              <div style="font-family:var(--pdisplay);font-size:12px;font-style:italic;color:var(--cream)">${s.area}</div>
+              <div style="font-family:var(--pmono);font-size:8px;color:var(--muted)">${s.prevCount} → ${s.count} transactions (90d vs prior 90d)</div>
+            </div>
+            <span style="font-family:var(--pmono);font-size:13px;font-weight:700;color:var(--red2)">${s.velocity}%</span>
+          </div>`).join('')
+        : `<div style="font-family:var(--pmono);font-size:9px;color:var(--dim);padding:12px">No supply shocks detected — transaction volumes stable across tracked areas</div>`;
+    }
+
+    // Transaction volume by area
+    const volEl = document.getElementById('ms-volume');
+    if(volEl) {
+      const volData = Object.entries(aStats)
+        .filter(([,s])=>s.count)
+        .sort((a,b)=>b[1].count-a[1].count);
+      const maxVol = volData[0]?.[1]?.count||1;
+      volEl.innerHTML = volData.slice(0,12).map(([area,s])=>`<div class="ms-bar-row">
+        <div class="ms-bar-label">${area}</div>
+        <div class="ms-bar-track"><div class="ms-bar-fill" style="width:${(s.count/maxVol*100).toFixed(0)}%;background:var(--blue2)"></div></div>
+        <div class="ms-bar-val">${s.count}</div>
+      </div>`).join('');
+    }
+
+  } else {
+    if(dldSection) dldSection.style.display='none';
+  }
 }
 
 /* ══ TICKER ════════════════════════════════════════════════════════════════ */
@@ -1601,11 +1791,24 @@ function openModal(id){
     document.getElementById('sp-current').textContent=`Now: ${f$(prices[prices.length-1])}`;
   } else spEl.style.display='none';
 
-  // Meta badges
+  // DLD comparables
+  document.getElementById('m-comps').innerHTML = renderComparables(l.area, l.type, l.beds);
+
+  // DLD area stats badges
   const badges=[];
   if(l.daysOnMarket) badges.push(`<span class="dom-badge">📅 ${l.daysOnMarket} days on market</span>`);
-  if(l.dropCount>1)  badges.push(`<span class="drop-count">↓ Dropped ${l.dropCount}× from first listed price</span>`);
+  if(l.dropCount>1)  badges.push(`<span class="drop-count">↓ Dropped ${l.dropCount}× from first price</span>`);
   if(l.firstSeen)    badges.push(`<span class="dom-badge">First seen: ${new Date(l.firstSeen).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'})}</span>`);
+  const velBadge  = renderVelocityBadge(l.area);
+  const cashBadge = renderCashBadge(l.area);
+  if(velBadge)  badges.push(velBadge);
+  if(cashBadge) badges.push(cashBadge);
+  const aStats = getAreaStats(l.area);
+  if(aStats?.secondaryPct) badges.push(`<span class="dom-badge">${aStats.secondaryPct}% secondary mkt</span>`);
+  if(aStats?.priceChange!=null) {
+    const pc2=aStats.priceChange;
+    badges.push(`<span class="dom-badge" style="color:${pc2>=0?'var(--teal2)':'var(--red2)'}">${pc2>=0?'+':''}${pc2}% PSF (90d)</span>`);
+  }
   document.getElementById('m-meta-badges').innerHTML=badges.join('');
 
   document.getElementById('m-scenarios').innerHTML=[
@@ -1628,6 +1831,63 @@ function openModal(id){
 }
 
 /* ══ MORTGAGE ═════════════════════════════════════════════════════════════ */
+/* ══ DLD ANALYTICS HELPERS ══════════════════════════════════════════════════ */
+function getAreaStats(area) { return LIVE_BENCHMARKS?.areaStats?.[area] || null; }
+
+function findComparables(area, type, beds, maxResults=5) {
+  if (!LIVE_TRANSACTIONS?.length) return [];
+  const bedStr = beds === 0 ? 'studio' : String(beds);
+  return LIVE_TRANSACTIONS
+    .filter(t => {
+      if (t.area !== area) return false;
+      const tm = type==='Villa'||type==='Townhouse'
+        ? (t.type||'').includes('villa')||(t.type||'').includes('townhouse')
+        : !(t.type||'').includes('villa');
+      const bm = !t.beds||t.beds===''||t.beds===bedStr||
+                 (beds===0&&(t.beds||'').toLowerCase().includes('studio'))||
+                 (beds>0&&t.beds===String(beds));
+      return tm && bm;
+    })
+    .sort((a,b) => new Date(b.date||0)-new Date(a.date||0))
+    .slice(0, maxResults);
+}
+
+function renderComparables(area, type, beds) {
+  const comps = findComparables(area, type, beds);
+  if (!comps.length) return `<div style="font-family:var(--pmono);font-size:9px;color:var(--dim);padding:8px">No DLD comparables yet — runs weekly when API key is active</div>`;
+  return comps.map(c => {
+    const ds = c.date ? new Date(c.date).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'2-digit'}) : '—';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bd)">
+      <div><div style="font-family:var(--pmono);font-size:9px;color:var(--cream);font-weight:600">${c.project||c.area}</div>
+      <div style="font-family:var(--pmono);font-size:8px;color:var(--dim)">${ds} · ${c.sqft?c.sqft.toLocaleString()+' sqft':'—'}</div></div>
+      <div style="text-align:right">
+        <div style="font-family:var(--pmono);font-size:12px;font-weight:700;color:var(--teal2)">${f$(c.price)}</div>
+        <div style="font-family:var(--pmono);font-size:8px;color:var(--muted)">${c.psf?'AED '+c.psf.toLocaleString()+'/sqft':'—'}</div>
+      </div></div>`;
+  }).join('');
+}
+
+function renderVelocityBadge(area) {
+  const s = getAreaStats(area); if (!s?.velocity) return '';
+  const col = s.velocity>=20?'var(--teal2)':s.velocity>=0?'var(--blue2)':'var(--red2)';
+  return `<span class="dom-badge" style="color:${col}">${s.velocity>0?'↑':'↓'} ${s.velocity>0?'+':''}${s.velocity}% vol</span>`;
+}
+
+function renderCashBadge(area) {
+  const s = getAreaStats(area); if (!s?.cashPct) return '';
+  const col = s.cashPct>=60?'var(--teal2)':s.cashPct>=40?'var(--amber)':'var(--red2)';
+  return `<span class="dom-badge" style="color:${col}">${s.cashPct}% cash</span>`;
+}
+
+function detectSupplyShocks() {
+  if (!LIVE_BENCHMARKS?.areaStats) return [];
+  return Object.entries(LIVE_BENCHMARKS.areaStats)
+    .filter(([,s])=>s.velocity!==null&&s.velocity<-30)
+    .sort((a,b)=>a[1].velocity-b[1].velocity)
+    .slice(0,5)
+    .map(([area,s])=>({area,velocity:s.velocity,count:s.count,prevCount:s.prevCount}));
+}
+
 function updateMortgage(){const l=L.find(x=>x._id===_openId);if(l)calcMortgage(l.ask,l);}
 function calcMortgage(price,l){
   const dp=parseFloat(document.getElementById('m-dp')?.value||20)/100;
