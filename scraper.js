@@ -115,10 +115,28 @@ function parsePrice(str) {
 }
 
 async function fetchPage(url) {
+  // Route through allorigins proxy — GitHub Actions IPs are blocked by PanicSelling directly
+  const proxied = url.includes('panicselling.com')
+    ? `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
+    : url;
   try {
-    const resp = await axios.get(url, { headers: HEADERS, timeout: 15000 });
+    const resp = await axios.get(proxied, { headers: HEADERS, timeout: 20000 });
+    // allorigins wraps response in {contents: "..."}
+    if (proxied.includes('allorigins')) {
+      const data = resp.data;
+      if (!data?.contents) throw new Error('allorigins: no contents');
+      return data.contents;
+    }
     return resp.data;
   } catch(e) {
+    // Fallback: try alternate proxy
+    if (url.includes('panicselling.com')) {
+      try {
+        const alt = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+        const r2 = await axios.get(alt, { headers: HEADERS, timeout: 20000 });
+        return r2.data;
+      } catch(e2) {}
+    }
     log(`  fetch error: ${e.message}`);
     return null;
   }
@@ -296,47 +314,37 @@ const AREA_DLD_MAP = {
 };
 
 async function getDLDToken() {
-  try {
-    log('  Getting DLD API token...');
-    const resp = await axios.post(
-      'https://apis.data.dubai/auth/token',
-      new URLSearchParams({
-        grant_type:    'client_credentials',
-        client_id:     DDA_CLIENT_ID,
-        client_secret: DDA_CLIENT_SECRET,
-      }),
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'x-DDA-SecurityApplicationIdentifier': DDA_SECURITY_ID,
-        },
-        timeout: 15000,
-      }
-    );
-    const token = resp.data?.access_token;
-    if (!token) throw new Error('No access_token in response');
-    log(`  Token obtained ✓`);
-    return token;
-  } catch(e) {
-    // Try alternate auth endpoint
+  const tokenEndpoints = [
+    'https://apis.data.dubai/auth/realms/ddads/protocol/openid-connect/token',
+    'https://stg-apis.data.dubai/auth/token',
+    'https://apis.data.dubai/auth/token',
+    'https://ipaas.dubai.gov.ae/auth/token',
+  ];
+  const body = new URLSearchParams({
+    grant_type:    'client_credentials',
+    client_id:     DDA_CLIENT_ID,
+    client_secret: DDA_CLIENT_SECRET,
+  });
+  for (const endpoint of tokenEndpoints) {
     try {
-      const resp2 = await axios.post(
-        `https://apis.data.dubai/open/dld/token`,
-        { client_id: DDA_CLIENT_ID, client_secret: DDA_CLIENT_SECRET },
-        {
-          headers: {
-            'x-DDA-SecurityApplicationIdentifier': DDA_SECURITY_ID,
-            'Content-Type': 'application/json',
-          },
-          timeout: 15000,
-        }
-      );
-      const token = resp2.data?.access_token || resp2.data?.token;
-      if (token) { log(`  Token obtained (alt) ✓`); return token; }
-    } catch(e2) {}
-    log(`  Token failed: ${e.message}`);
-    return null;
+      log(`  Trying: ${endpoint.split('/').slice(2,4).join('/')}`);
+      const resp = await axios.post(endpoint, body.toString(), {
+        headers: {
+          'Content-Type':                        'application/x-www-form-urlencoded',
+          'x-DDA-SecurityApplicationIdentifier': DDA_SECURITY_ID,
+          'ApplicationId':                       DDA_APP_ID,
+        },
+        timeout: 10000,
+      });
+      const token = resp.data?.access_token || resp.data?.token;
+      if (token) { log(`  Token ✓ from ${endpoint.split('/')[2]}`); return token; }
+    } catch(e) {
+      log(`  ${endpoint.split('/')[2]}: ${e.response?.status||e.code||e.message}`);
+    }
+    await sleep(300);
   }
+  log('  All token endpoints failed');
+  return null;
 }
 
 async function fetchDLDTransactions(token, areaName, months = 3) {
@@ -371,7 +379,7 @@ async function fetchDLDTransactions(token, areaName, months = 3) {
           'Content-Type':                        'application/json',
         },
         params,
-        timeout: 20000,
+        timeout: 8000,
       });
       const data = resp.data;
       // Handle various response formats
@@ -440,9 +448,7 @@ async function updateBenchmarks() {
   const TOP_AREAS = [
     'Downtown Dubai','Dubai Marina','Palm Jumeirah','Business Bay',
     'Jumeirah Village Circle','Jumeirah Beach Residence','Dubai Hills Estate',
-    'Arabian Ranches','The Springs','The Meadows','DIFC','Emaar Beachfront',
-    'Jumeirah Lake Towers','Damac Hills','Meydan','Al Barsha',
-    'Mohammed Bin Rashid City','Dubai Creek Harbour','Dubai Harbour','The Valley',
+    'Arabian Ranches','The Springs','The Meadows',
   ];
 
   const livePSF = { ...BASE_PSF }; // start with base, override with live
@@ -469,7 +475,7 @@ async function updateBenchmarks() {
     } catch(e) {
       log(`  ✗ ${area}: ${e.message}`);
     }
-    await sleep(400);
+    await sleep(200);
   }
 
   log(`\n  DLD API: ${successCount}/${TOP_AREAS.length} areas updated with live data`);
