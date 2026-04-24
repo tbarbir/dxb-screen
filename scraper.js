@@ -769,7 +769,7 @@ async function main() {
       l.price_history   = [{ price: l.current_price, date: l.detected_at }];
     }
     snapshot.push(l);
-    if (l.drop_from_first < 0) drops.push(l);
+   drops.push(l); // All PanicSelling listings are already drops — include all
   }
 
   drops.sort((a, b) => a.drop_from_first - b.drop_from_first);
