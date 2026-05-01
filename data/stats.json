@@ -1,16 +1,16 @@
 {
-  "runAt": "2026-05-01T17:05:36.445Z",
+  "runAt": "2026-05-01T22:51:05.446Z",
   "isFirstRun": false,
-  "totalListings": 122,
-  "totalDrops": 122,
-  "dropsGte1": 3,
+  "totalListings": 106,
+  "totalDrops": 106,
+  "dropsGte1": 4,
   "dropsGte5": 3,
   "dropsGte10": 0,
   "biggestDrop": -5.97,
-  "avgDrop": -0.1,
-  "totalSaved": 335000,
+  "avgDrop": -0.2,
+  "totalSaved": 385000,
   "areasWithDrops": 5,
-  "saleDrops": 101,
+  "saleDrops": 85,
   "rentDrops": 21,
   "areasScraped": 74
 }
